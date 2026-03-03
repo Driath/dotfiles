@@ -97,6 +97,11 @@ config.keys = {
       window:perform_action(wezterm.action.SendString(result), pane)
     end
   end)},
+  -- Cmd+Shift+Arrows : naviguer entre panes tmux
+  { key = 'LeftArrow',  mods = 'CMD|SHIFT', action = tmux('h') },
+  { key = 'RightArrow', mods = 'CMD|SHIFT', action = tmux('l') },
+  { key = 'UpArrow',    mods = 'CMD|SHIFT', action = tmux('k') },
+  { key = 'DownArrow',  mods = 'CMD|SHIFT', action = tmux('j') },
   -- Cmd+D : split horizontal / Cmd+Shift+D : split vertical
   { key = 'd', mods = 'CMD', action = tmux('\\') },
   { key = 'd', mods = 'CMD|SHIFT', action = tmux("'") },
