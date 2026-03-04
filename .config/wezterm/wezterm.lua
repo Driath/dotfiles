@@ -19,23 +19,60 @@ local function tmux_refresh()
   io.popen('/opt/homebrew/bin/tmux refresh-client -S')
 end
 
+-- Cycle de thèmes
+local themes = {
+  'Catppuccin Mocha',
+  'Tokyo Night',
+  'Dracula',
+  'Nord (Gogh)',
+  'Gruvbox Dark',
+  'One Dark (Gogh)',
+  'Kanagawa (Gogh)',
+  'rose-pine',
+  'Cobalt2',
+}
+
+local theme_file = '/tmp/wezterm_theme_index'
+
+local function get_theme_index()
+  local f = io.open(theme_file, 'r')
+  if not f then return 1 end
+  local n = tonumber(f:read('*l')) or 1
+  f:close()
+  return n
+end
+
+local function set_theme_index(n)
+  local f = io.open(theme_file, 'w')
+  if f then f:write(tostring(n)); f:close() end
+end
+
+local function cycle_theme(window, delta)
+  local idx = get_theme_index()
+  idx = ((idx - 1 + delta) % #themes) + 1
+  set_theme_index(idx)
+  window:set_config_overrides({ color_scheme = themes[idx] })
+  io.popen('/opt/homebrew/bin/terminal-notifier -title "Theme" -message "' .. themes[idx] .. '" -group wezterm')
+end
+
 local config = wezterm.config_builder()
 
 -- Démarre toujours dans tmux
 config.default_prog = { '/bin/zsh', '-c', '/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new-session' }
 
 -- Apparence
-config.color_scheme = 'Catppuccin Mocha'
-config.font = wezterm.font 'JetBrains Mono'
+-- config.color_scheme = 'Catppuccin Mocha'
+config.font = wezterm.font 'JetBrainsMono Nerd Font'
 config.font_size = 14
 config.line_height = 1.05
 config.front_end = 'WebGpu'
 config.enable_kitty_graphics = true
-config.window_padding = { left = 0, right = 0, top = 28, bottom = 0 }
+config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.enable_tab_bar = false
 config.window_background_opacity = 0.85
 config.macos_window_background_blur = 7
 config.window_decorations = 'RESIZE'
+config.window_close_confirmation = 'NeverPrompt'
 
 -- Left option compose (AZERTY : \, |, @, etc.)
 config.send_composed_key_when_left_alt_is_pressed = true
@@ -97,11 +134,13 @@ config.keys = {
       window:perform_action(wezterm.action.SendString(result), pane)
     end
   end)},
-  -- Cmd+Shift+Arrows : naviguer entre panes tmux
-  { key = 'LeftArrow',  mods = 'CMD|SHIFT', action = tmux('h') },
-  { key = 'RightArrow', mods = 'CMD|SHIFT', action = tmux('l') },
-  { key = 'UpArrow',    mods = 'CMD|SHIFT', action = tmux('k') },
-  { key = 'DownArrow',  mods = 'CMD|SHIFT', action = tmux('j') },
+  -- Cmd+Option+Arrows : naviguer entre panes tmux
+  { key = 'LeftArrow',  mods = 'CMD|ALT', action = tmux('h') },
+  { key = 'RightArrow', mods = 'CMD|ALT', action = tmux('l') },
+  { key = 'UpArrow',    mods = 'CMD|ALT', action = tmux('k') },
+  { key = 'DownArrow',  mods = 'CMD|ALT', action = tmux('j') },
+  -- Cmd+R : renommer la window tmux
+  { key = 'r', mods = 'CMD', action = tmux(',') },
   -- Cmd+D : split horizontal / Cmd+Shift+D : split vertical
   { key = 'd', mods = 'CMD', action = tmux('\\') },
   { key = 'd', mods = 'CMD|SHIFT', action = tmux("'") },
@@ -121,8 +160,17 @@ config.keys = {
   -- Cmd+Left/Right : naviguer entre windows tmux
   { key = 'LeftArrow', mods = 'CMD', action = tmux('p') },
   { key = 'RightArrow', mods = 'CMD', action = tmux('n') },
-  -- Cmd+Enter : toggle fullscreen
-  { key = 'Enter', mods = 'CMD', action = wezterm.action.ToggleFullScreen },
+  -- Cmd+< / Cmd+> : cycle thèmes
+  { key = '<', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, -1) end) },
+  { key = '>', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, 1) end) },
+  -- Cmd+Q : ferme WezTerm sans toucher aux sessions tmux
+  { key = 'q', mods = 'CMD', action = wezterm.action.QuitApplication },
+  -- Cmd++ / Cmd+- / Cmd+0 : zoom
+  { key = '+', mods = 'CMD', action = wezterm.action.IncreaseFontSize },
+  { key = '-', mods = 'CMD', action = wezterm.action.DecreaseFontSize },
+  { key = '0', mods = 'CMD', action = wezterm.action.ResetFontSize },
+  -- Cmd+F : toggle fullscreen
+  { key = 'f', mods = 'CMD', action = wezterm.action.ToggleFullScreen },
   -- Shift+Enter
   { key = 'Enter', mods = 'SHIFT', action = wezterm.action.SendString('\x1b[13;2u') },
 }
