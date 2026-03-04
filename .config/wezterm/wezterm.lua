@@ -134,13 +134,20 @@ config.keys = {
       window:perform_action(wezterm.action.SendString(result), pane)
     end
   end)},
+  -- Cmd+Option+Shift+Arrows : swap pane
+  { key = 'LeftArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{left-of}"') end) },
+  { key = 'RightArrow', mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{right-of}"') end) },
+  { key = 'UpArrow',    mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{up-of}"') end) },
+  { key = 'DownArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{down-of}"') end) },
   -- Cmd+Option+Arrows : naviguer entre panes tmux
   { key = 'LeftArrow',  mods = 'CMD|ALT', action = tmux('h') },
   { key = 'RightArrow', mods = 'CMD|ALT', action = tmux('l') },
   { key = 'UpArrow',    mods = 'CMD|ALT', action = tmux('k') },
   { key = 'DownArrow',  mods = 'CMD|ALT', action = tmux('j') },
-  -- Cmd+R : renommer la window tmux
-  { key = 'r', mods = 'CMD', action = tmux(',') },
+  -- Cmd+R : renommer le pane tmux
+  { key = 'r', mods = 'CMD', action = tmux('P') },
+  -- Cmd+Shift+R : renommer la session tmux
+  { key = 'r', mods = 'CMD|SHIFT', action = tmux('S') },
   -- Cmd+D : split horizontal / Cmd+Shift+D : split vertical
   { key = 'd', mods = 'CMD', action = tmux('\\') },
   { key = 'd', mods = 'CMD|SHIFT', action = tmux("'") },
