@@ -41,7 +41,8 @@ echo "✓ tmux plugins"
 mkdir -p "$HOME/.local/bin"
 ln -sf "$DOTFILES/.local/bin/screenshot.sh" "$HOME/.local/bin/screenshot.sh"
 ln -sf "$DOTFILES/.local/bin/pane-stats-update.sh" "$HOME/.local/bin/pane-stats-update.sh"
-chmod +x "$HOME/.local/bin/screenshot.sh" "$HOME/.local/bin/pane-stats-update.sh"
+ln -sf "$DOTFILES/.local/bin/pane-border-format.sh" "$HOME/.local/bin/pane-border-format.sh"
+chmod +x "$HOME/.local/bin/screenshot.sh" "$HOME/.local/bin/pane-stats-update.sh" "$HOME/.local/bin/pane-border-format.sh"
 echo "✓ Screenshot tool"
 
 # Clipboard paste script
