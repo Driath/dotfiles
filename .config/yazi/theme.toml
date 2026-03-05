@@ -8,6 +8,7 @@ count_cut = { fg = "#f38ba8", bg = "reset" }
 count_selected = { fg = "#f9e2af", bg = "reset" }
 
 [indicator]
+current = { fg = "brightwhite", bold = true }
 padding = { open = "", close = "" }
 
 [status]
@@ -16,3 +17,9 @@ sep_right = { open = "", close = "" }
 mode_normal = { bg = "reset", bold = true }
 mode_select = { bg = "reset", bold = true }
 mode_unset = { bg = "reset", bold = true }
+
+[filetype]
+rules = [
+  { mime = "*", fg = "brightblack" },
+  { url = "*/", fg = "brightblack" },
+]
