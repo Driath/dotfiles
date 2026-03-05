@@ -3,6 +3,10 @@ set -e
 
 echo "Uninstalling dotfiles..."
 
+# Starship
+rm -f "$HOME/.config/starship.toml"
+echo "✓ Starship"
+
 # WezTerm
 rm -f "$HOME/.config/wezterm/wezterm.lua"
 echo "✓ WezTerm"

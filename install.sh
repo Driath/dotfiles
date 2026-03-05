@@ -10,6 +10,11 @@ echo "Installing dependencies..."
 brew install pngpaste 2>/dev/null || true
 echo "✓ Dependencies"
 
+# Starship
+mkdir -p "$HOME/.config"
+ln -sf "$DOTFILES/.config/starship.toml" "$HOME/.config/starship.toml"
+echo "✓ Starship"
+
 # WezTerm
 mkdir -p "$HOME/.config/wezterm"
 ln -sf "$DOTFILES/.config/wezterm/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
