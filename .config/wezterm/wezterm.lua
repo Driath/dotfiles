@@ -2,7 +2,7 @@ local wezterm = require 'wezterm'
 local HOME = os.getenv('HOME')
 
 -- Find tmux binary
-local tmux_bin = wezterm.executable_find('tmux') or '/opt/homebrew/bin/tmux'
+local tmux_bin = '/opt/homebrew/bin/tmux'
 
 -- Returns true if we're inside a tmux session
 local function in_tmux()
