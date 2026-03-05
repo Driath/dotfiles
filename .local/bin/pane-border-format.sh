@@ -22,6 +22,8 @@ INACTIVE_STATS='#{?#{@pane_cpu},#[fg=#{@color-inactive}]│ 󰍛 #{@pane_cpu} �
 INACTIVE="${INACTIVE_DOT} ${INACTIVE_NAME} ${INACTIVE_PATH} ${INACTIVE_TITLE} ${INACTIVE_GIT}${INACTIVE_STATS}${INACTIVE_DOT}"
 
 # --- Compose final format ---
-FORMAT="#{?pane_active,${ACTIVE},${INACTIVE}}"
+# Hide border for yazi panes
+NORMAL="#{?pane_active,${ACTIVE},${INACTIVE}}"
+FORMAT="#{?#{m:yazi,#{pane_current_command}},,${NORMAL}}"
 
 tmux set -gw pane-border-format "$FORMAT"

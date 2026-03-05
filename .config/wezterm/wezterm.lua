@@ -84,8 +84,8 @@ config.front_end = 'WebGpu'
 config.enable_kitty_graphics = true
 config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.enable_tab_bar = false
-config.window_background_opacity = 0.85
-config.macos_window_background_blur = 7
+config.window_background_opacity = 0.78
+config.macos_window_background_blur = 0
 config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
 
@@ -196,6 +196,10 @@ config.keys = {
   { key = 'f', mods = 'CMD', action = wezterm.action.ToggleFullScreen },
   -- Shift+Enter
   { key = 'Enter', mods = 'SHIFT', action = wezterm.action.SendString('\x1b[13;2u') },
+  -- Cmd+E : toggle yazi sidebar
+  { key = 'e', mods = 'CMD', action = wezterm.action_callback(function()
+    io.popen(find_bin('tmux', '/opt/homebrew/bin/tmux') .. ' run-shell -b "~/.local/bin/yazi-toggle.sh"')
+  end)},
 }
 
 return config

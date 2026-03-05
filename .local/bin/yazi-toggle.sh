@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Toggle yazi sidebar in the current tmux window
+# If a yazi pane exists, kill it and restore layout. Otherwise, split left 30%.
+
+TMUX_BIN="$(command -v tmux)"
+YAZI_BIN="$(command -v yazi)"
+
+# Find a pane in the current window running yazi
+yazi_pane=$("$TMUX_BIN" list-panes -F '#{pane_id} #{pane_current_command}' \
+  | awk '$2 == "yazi" { print $1; exit }')
+
+if [ -n "$yazi_pane" ]; then
+  # Restore saved layout, then kill yazi pane
+  saved_layout=$("$TMUX_BIN" show-option -wqv @yazi_layout)
+  "$TMUX_BIN" kill-pane -t "$yazi_pane"
+  if [ -n "$saved_layout" ]; then
+    "$TMUX_BIN" select-layout "$saved_layout"
+    "$TMUX_BIN" set-option -wu @yazi_layout
+  fi
+else
+  # Save current layout before splitting
+  "$TMUX_BIN" set-option -w @yazi_layout "$("$TMUX_BIN" display-message -p '#{window_layout}')"
+  # Get current pane's path for yazi to start in
+  pane_path=$("$TMUX_BIN" display-message -p '#{pane_current_path}')
+  # Split left 30% (minimum 80 columns)
+  win_width=$("$TMUX_BIN" display-message -p '#{window_width}')
+  size=$(( win_width * 30 / 100 ))
+  [ "$size" -lt 80 ] && size=80
+  "$TMUX_BIN" split-window -hbf -l "$size" -c "$pane_path" "$YAZI_BIN"
+fi
