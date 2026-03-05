@@ -8,6 +8,8 @@ echo "Installing dotfiles..."
 # Dependencies
 echo "Installing dependencies..."
 brew install pngpaste 2>/dev/null || true
+brew install terminal-notifier 2>/dev/null || true
+pip3 install pyobjc-framework-Quartz 2>/dev/null || true
 echo "✓ Dependencies"
 
 # Starship
@@ -23,6 +25,23 @@ echo "✓ WezTerm"
 # tmux
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "✓ tmux"
+
+# TPM (tmux plugin manager)
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm" 2>/dev/null
+  echo "✓ TPM installed"
+else
+  echo "✓ TPM already installed"
+fi
+# Install tmux plugins
+"$HOME/.tmux/plugins/tpm/bin/install_plugins" 2>/dev/null || true
+echo "✓ tmux plugins"
+
+# Screenshot tool
+mkdir -p "$HOME/.local/bin"
+ln -sf "$DOTFILES/.local/bin/screenshot.sh" "$HOME/.local/bin/screenshot.sh"
+chmod +x "$HOME/.local/bin/screenshot.sh"
+echo "✓ Screenshot tool"
 
 # Clipboard paste script
 mkdir -p "$HOME/.local/share/wezterm/clipboard-images"
@@ -40,6 +59,13 @@ echo "✓ Clipboard paste"
 mkdir -p "$HOME/.local/share/claude"
 ln -sf "$DOTFILES/.local/share/claude/notify-done.sh" "$HOME/.local/share/claude/notify-done.sh"
 chmod +x "$HOME/.local/share/claude/notify-done.sh"
+
+# Claude Code skills
+mkdir -p "$HOME/.claude/skills"
+for skill in "$DOTFILES/.claude/skills"/*/; do
+  [ -d "$skill" ] && ln -sf "$skill" "$HOME/.claude/skills/$(basename "$skill")"
+done
+echo "✓ Claude Code skills"
 # Inject Stop hook into ~/.claude/settings.json if not already present
 if [ -f "$HOME/.claude/settings.json" ]; then
   python3 -c "

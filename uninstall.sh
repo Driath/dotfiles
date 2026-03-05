@@ -15,9 +15,19 @@ echo "✓ WezTerm"
 rm -f "$HOME/.tmux.conf"
 echo "✓ tmux"
 
+# Screenshot tool
+rm -f "$HOME/.local/bin/screenshot.sh"
+echo "✓ Screenshot tool"
+
 # Clipboard paste script
 rm -f "$HOME/.local/share/wezterm/clipboard-paste.sh"
 echo "✓ Clipboard paste"
+
+# Claude Code skills
+for skill in "$HOME/.claude/skills"/screenshot "$HOME/.claude/skills"/statusbar; do
+  [ -L "$skill" ] && rm -f "$skill"
+done
+echo "✓ Claude Code skills"
 
 # Claude Code hook
 rm -f "$HOME/.local/share/claude/notify-done.sh"
