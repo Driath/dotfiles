@@ -24,7 +24,7 @@ else
   pane_path=$("$TMUX_BIN" display-message -p '#{pane_current_path}')
   # Split left 30% (minimum 80 columns)
   win_width=$("$TMUX_BIN" display-message -p '#{window_width}')
-  size=$(( win_width * 30 / 100 ))
-  [ "$size" -lt 80 ] && size=80
+  size=$(( win_width * 33 / 100 ))
+  [ "$size" -lt 48 ] && size=48
   "$TMUX_BIN" split-window -hbf -l "$size" -c "$pane_path" "$YAZI_BIN"
 fi
