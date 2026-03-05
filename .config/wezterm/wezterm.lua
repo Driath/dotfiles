@@ -13,6 +13,7 @@ local function find_bin(name, fallback)
 end
 
 local tmux_bin = find_bin('tmux', '/opt/homebrew/bin/tmux')
+local notifier_bin = find_bin('terminal-notifier', '/opt/homebrew/bin/terminal-notifier')
 
 -- Returns true if we're inside a tmux session
 local function in_tmux()
@@ -66,7 +67,7 @@ local function cycle_theme(window, delta)
   idx = ((idx - 1 + delta) % #themes) + 1
   set_theme_index(idx)
   window:set_config_overrides({ color_scheme = themes[idx] })
-  io.popen('terminal-notifier -title "Theme" -message "' .. themes[idx] .. '" -group wezterm')
+  io.popen(notifier_bin .. ' -title "Theme" -message "' .. themes[idx] .. '" -group wezterm')
 end
 
 local config = wezterm.config_builder()
