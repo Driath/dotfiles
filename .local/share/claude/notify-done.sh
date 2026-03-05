@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Dependency check
+_check_dep() {
+  local bin=$1 install=$2
+  command -v "$bin" >/dev/null 2>&1 && { echo $(command -v "$bin"); return 0; }
+  echo "⚠ $bin not found. Install it with: $install" >&2
+  return 1
+}
+
+TMUX_BIN=$(_check_dep tmux "brew install tmux") || exit 0
+NOTIFIER_BIN=$(_check_dep terminal-notifier "brew install terminal-notifier") || exit 0
+
 # Lit le payload JSON de Claude Code sur stdin
 INPUT=$(cat)
 
@@ -35,7 +46,7 @@ def get_ppid(pid):
 
 # Liste tous les panes avec leur pid et path
 panes = subprocess.check_output([
-    '/opt/homebrew/bin/tmux', 'list-panes', '-a',
+    '$TMUX_BIN', 'list-panes', '-a',
     '-F', '#{session_name}|#{window_index}|#{pane_index}|#{pane_id}|#{pane_pid}|#{pane_current_path}'
 ], text=True).strip().split('\n')
 
@@ -74,20 +85,20 @@ fi
 FOCUS_SCRIPT="/tmp/claude-notify-focus-$$.sh"
 cat > "$FOCUS_SCRIPT" << SCRIPT
 #!/bin/bash
-/opt/homebrew/bin/tmux switch-client -t '${TMUX_SESSION}' 2>/dev/null
-/opt/homebrew/bin/tmux select-window -t '${TMUX_SESSION}:${TMUX_WINDOW}' 2>/dev/null
-/opt/homebrew/bin/tmux select-pane -t '${TMUX_PANE_ID}' 2>/dev/null
+$TMUX_BIN switch-client -t '${TMUX_SESSION}' 2>/dev/null
+$TMUX_BIN select-window -t '${TMUX_SESSION}:${TMUX_WINDOW}' 2>/dev/null
+$TMUX_BIN select-pane -t '${TMUX_PANE_ID}' 2>/dev/null
 open -a WezTerm 2>/dev/null
 SCRIPT
 chmod +x "$FOCUS_SCRIPT"
 
 # Cloche sur la window tmux
 if [ -n "$TMUX_PANE_ID" ]; then
-  /opt/homebrew/bin/tmux set-option -w -t "$TMUX_PANE_ID" @notif "1" 2>/dev/null
-  /opt/homebrew/bin/tmux refresh-client -S 2>/dev/null
+  $TMUX_BIN set-option -w -t "$TMUX_PANE_ID" @notif "1" 2>/dev/null
+  $TMUX_BIN refresh-client -S 2>/dev/null
 fi
 
-/opt/homebrew/bin/terminal-notifier \
+$NOTIFIER_BIN \
   -title "$TITLE" \
   -message "${LAST_MSG:-Done}" \
   -group claude-done \

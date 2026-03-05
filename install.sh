@@ -23,6 +23,12 @@ echo "✓ tmux"
 mkdir -p "$HOME/.local/share/wezterm/clipboard-images"
 ln -sf "$DOTFILES/.local/share/wezterm/clipboard-paste.sh" "$HOME/.local/share/wezterm/clipboard-paste.sh"
 chmod +x "$HOME/.local/share/wezterm/clipboard-paste.sh"
+
+# Cleanup old clipboard images (older than 7 days)
+if command -v crontab >/dev/null; then
+  (crontab -l 2>/dev/null | grep -v "clipboard-images"; echo "0 0 * * * find $HOME/.local/share/wezterm/clipboard-images -name '*.png' -mtime +7 -delete") | crontab -
+  echo "✓ Clipboard cleanup scheduled"
+fi
 echo "✓ Clipboard paste"
 
 # Claude Code hooks

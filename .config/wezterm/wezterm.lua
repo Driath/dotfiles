@@ -1,8 +1,12 @@
 local wezterm = require 'wezterm'
+local HOME = os.getenv('HOME')
+
+-- Find tmux binary
+local tmux_bin = wezterm.executable_find('tmux') or '/opt/homebrew/bin/tmux'
 
 -- Returns true if we're inside a tmux session
 local function in_tmux()
-  local handle = io.popen('/opt/homebrew/bin/tmux info 2>/dev/null')
+  local handle = io.popen(tmux_bin .. ' info 2>/dev/null')
   if not handle then return false end
   local result = handle:read('*l')
   handle:close()
@@ -16,7 +20,7 @@ end
 
 -- Refresh tmux status bar
 local function tmux_refresh()
-  io.popen('/opt/homebrew/bin/tmux refresh-client -S')
+  io.popen(tmux_bin .. ' refresh-client -S')
 end
 
 -- Cycle de thèmes
@@ -52,13 +56,13 @@ local function cycle_theme(window, delta)
   idx = ((idx - 1 + delta) % #themes) + 1
   set_theme_index(idx)
   window:set_config_overrides({ color_scheme = themes[idx] })
-  io.popen('/opt/homebrew/bin/terminal-notifier -title "Theme" -message "' .. themes[idx] .. '" -group wezterm')
+  io.popen('terminal-notifier -title "Theme" -message "' .. themes[idx] .. '" -group wezterm')
 end
 
 local config = wezterm.config_builder()
 
 -- Démarre toujours dans tmux
-config.default_prog = { '/bin/zsh', '-c', '/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new-session' }
+config.default_prog = { '/bin/zsh', '-c', tmux_bin .. ' attach || ' .. tmux_bin .. ' new-session' }
 
 -- Apparence
 -- config.color_scheme = 'Catppuccin Mocha'
@@ -110,7 +114,7 @@ config.keys = {
   end)},
   -- Cmd+, : ouvre la config
   { key = ',', mods = 'CMD', action = wezterm.action.SpawnCommandInNewTab {
-    args = { '/bin/zsh', '-c', 'open ' .. (os.getenv('HOME') or '') .. '/.config/wezterm/wezterm.lua' },
+    args = { '/bin/zsh', '-c', 'open ' .. (HOME or '') .. '/.config/wezterm/wezterm.lua' },
   }},
   -- Cmd+C : copier si sélection, sinon SIGINT
   { key = 'c', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
@@ -123,7 +127,8 @@ config.keys = {
   end)},
   -- Cmd+V : coller (image → path, texte → texte)
   { key = 'v', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    local handle = io.popen('/Users/matthieuczeski/.local/share/wezterm/clipboard-paste.sh')
+    local paste_script = (HOME or '') .. '/.local/share/wezterm/clipboard-paste.sh'
+    local handle = io.popen(paste_script)
     if not handle then
       window:perform_action(wezterm.action.PasteFrom 'Clipboard', pane)
       return
@@ -135,10 +140,10 @@ config.keys = {
     end
   end)},
   -- Cmd+Option+Shift+Arrows : swap pane
-  { key = 'LeftArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{left-of}"') end) },
-  { key = 'RightArrow', mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{right-of}"') end) },
-  { key = 'UpArrow',    mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{up-of}"') end) },
-  { key = 'DownArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen('/opt/homebrew/bin/tmux swap-pane -s "{down-of}"') end) },
+  { key = 'LeftArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{left-of}"') end) },
+  { key = 'RightArrow', mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{right-of}"') end) },
+  { key = 'UpArrow',    mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{up-of}"') end) },
+  { key = 'DownArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{down-of}"') end) },
   -- Cmd+Option+Arrows : naviguer entre panes tmux
   { key = 'LeftArrow',  mods = 'CMD|ALT', action = tmux('h') },
   { key = 'RightArrow', mods = 'CMD|ALT', action = tmux('l') },
@@ -153,11 +158,11 @@ config.keys = {
   { key = 'd', mods = 'CMD|SHIFT', action = tmux("'") },
   -- Cmd+N : nouvelle session tmux
   { key = 'n', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    local handle = io.popen('/opt/homebrew/bin/tmux new-session -dP -F "#{session_id}"')
+    local handle = io.popen(tmux_bin .. ' new-session -dP -F "#{session_id}"')
     local id = handle and handle:read('*l') or nil
     if handle then handle:close() end
     if id then
-      io.popen('/opt/homebrew/bin/tmux switch-client -t ' .. id)
+      io.popen(tmux_bin .. ' switch-client -t ' .. id)
       tmux_refresh()
     end
   end)},
