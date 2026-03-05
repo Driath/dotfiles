@@ -20,15 +20,38 @@ if [ "$STOP_ACTIVE" = "True" ]; then
   exit 0
 fi
 
-# Dernier message
-LAST_MSG=$(echo "$INPUT" | python3 -c "
-import sys, json
+# Dernier prompt user (subtitle) + réponse assistant (message)
+NOTIF_DATA=$(echo "$INPUT" | python3 -c "
+import sys, json, os
 d = json.load(sys.stdin)
-msg = d.get('last_assistant_message', '').strip().replace('\n', ' ')
-if len(msg) > 120:
-    msg = msg[:117] + '...'
-print(msg)
+transcript = d.get('transcript_path', '')
+user_msg = ''
+if transcript and os.path.exists(transcript):
+    with open(transcript) as f:
+        for line in f:
+            try:
+                entry = json.loads(line)
+                if entry.get('type') == 'user':
+                    text = entry.get('message', {}).get('content', '')
+                    if isinstance(text, list):
+                        text = ' '.join(t.get('text', '') for t in text if isinstance(t, dict) and t.get('type') == 'text')
+                    elif not isinstance(text, str):
+                        text = ''
+                    if text.strip():
+                        user_msg = text.strip()
+            except:
+                pass
+assistant_msg = d.get('last_assistant_message', '').strip()
+def trunc(m):
+    m = m.replace('\n', ' ').replace('\t', ' ')
+    return m[:117] + '...' if len(m) > 120 else m
+print(json.dumps({'user': trunc(user_msg), 'assistant': trunc(assistant_msg)}))
 " 2>/dev/null)
+
+USER_PROMPT=$(echo "$NOTIF_DATA" | python3 -c "import sys,json; print(json.load(sys.stdin).get('user',''))" 2>/dev/null)
+ASSISTANT_MSG=$(echo "$NOTIF_DATA" | python3 -c "import sys,json; print(json.load(sys.stdin).get('assistant',''))" 2>/dev/null)
+USER_PROMPT="${USER_PROMPT:-Prompt}"
+ASSISTANT_MSG="${ASSISTANT_MSG:-Done}"
 
 # Session et pane tmux
 CWD=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd', ''))" 2>/dev/null)
@@ -72,10 +95,13 @@ TMUX_WINDOW=$(echo "$PANE_INFO" | cut -d'|' -f2)
 TMUX_PANE_NUM=$(echo "$PANE_INFO" | cut -d'|' -f3)
 TMUX_PANE_ID=$(echo "$PANE_INFO" | cut -d'|' -f4)
 
+TMUX_SESSION_TOTAL=$($TMUX_BIN list-sessions 2>/dev/null | wc -l | tr -d " ")
+TMUX_SESSION_IDX=$($TMUX_BIN list-sessions 2>/dev/null | grep -n "^$(echo $TMUX_SESSION):" | cut -d: -f1)
+
 if [ -n "$TMUX_SESSION" ]; then
-  TITLE="CC :  ${TMUX_SESSION}   ${TMUX_WINDOW}"
-  if [ -n "$TMUX_PANE_NUM" ] && [ "$TMUX_PANE_NUM" != "0" ]; then
-    TITLE="${TITLE}  󰕮 ${TMUX_PANE_NUM}"
+  TITLE="CC : ${TMUX_SESSION} ${TMUX_SESSION_IDX:-1}/${TMUX_SESSION_TOTAL:-1} > w${TMUX_WINDOW}"
+  if [ -n "$TMUX_PANE_NUM" ] && [ "$TMUX_PANE_NUM" \!= "0" ]; then
+    TITLE="${TITLE} > p${TMUX_PANE_NUM}"
   fi
 else
   TITLE="CC"
@@ -100,7 +126,8 @@ fi
 
 $NOTIFIER_BIN \
   -title "$TITLE" \
-  -message "${LAST_MSG:-Done}" \
+  -subtitle "$USER_PROMPT" \
+  -message "$ASSISTANT_MSG" \
   -group claude-done \
   -sound default \
   -execute "$FOCUS_SCRIPT" \
