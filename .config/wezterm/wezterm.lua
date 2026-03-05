@@ -149,10 +149,10 @@ config.keys = {
   { key = 'RightArrow', mods = 'CMD|ALT', action = tmux('l') },
   { key = 'UpArrow',    mods = 'CMD|ALT', action = tmux('k') },
   { key = 'DownArrow',  mods = 'CMD|ALT', action = tmux('j') },
-  -- Cmd+R : renommer le pane tmux
-  { key = 'r', mods = 'CMD', action = tmux('P') },
-  -- Cmd+Shift+R : renommer la session tmux
-  { key = 'r', mods = 'CMD|SHIFT', action = tmux('S') },
+  -- Cmd+R : renommer la session tmux
+  { key = 'r', mods = 'CMD', action = tmux('S') },
+  -- Cmd+Alt+F : zoom/dézoom pane tmux
+  { key = 'f', mods = 'CMD|ALT', action = tmux('z') },
   -- Cmd+D : split horizontal / Cmd+Shift+D : split vertical
   { key = 'd', mods = 'CMD', action = tmux('\\') },
   { key = 'd', mods = 'CMD|SHIFT', action = tmux("'") },
