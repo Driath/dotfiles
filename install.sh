@@ -25,4 +25,31 @@ ln -sf "$DOTFILES/.local/share/wezterm/clipboard-paste.sh" "$HOME/.local/share/w
 chmod +x "$HOME/.local/share/wezterm/clipboard-paste.sh"
 echo "✓ Clipboard paste"
 
+# Claude Code hooks
+mkdir -p "$HOME/.local/share/claude"
+ln -sf "$DOTFILES/.local/share/claude/notify-done.sh" "$HOME/.local/share/claude/notify-done.sh"
+chmod +x "$HOME/.local/share/claude/notify-done.sh"
+# Inject Stop hook into ~/.claude/settings.json if not already present
+if [ -f "$HOME/.claude/settings.json" ]; then
+  python3 -c "
+import json, sys
+path = '$HOME/.claude/settings.json'
+with open(path) as f:
+    s = json.load(f)
+hook = {'type': 'command', 'command': '$HOME/.local/share/claude/notify-done.sh', 'async': True}
+entry = {'matcher': '', 'hooks': [hook]}
+s.setdefault('hooks', {}).setdefault('Stop', [])
+if not any(h.get('hooks', [{}])[0].get('command', '').endswith('notify-done.sh') for h in s['hooks']['Stop']):
+    s['hooks']['Stop'].append(entry)
+    with open(path, 'w') as f:
+        json.dump(s, f, indent=2)
+    print('✓ Claude hook injected')
+else:
+    print('✓ Claude hook already present')
+"
+else
+  echo "⚠ ~/.claude/settings.json not found, skipping hook injection"
+fi
+echo "✓ Claude Code notifications"
+
 echo "Done. Restart WezTerm and run: tmux kill-server"
