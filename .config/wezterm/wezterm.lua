@@ -1,8 +1,18 @@
 local wezterm = require 'wezterm'
 local HOME = os.getenv('HOME')
 
--- Find tmux binary
-local tmux_bin = '/opt/homebrew/bin/tmux'
+-- Find binary path
+local function find_bin(name, fallback)
+  local h = io.popen('command -v ' .. name .. ' 2>/dev/null')
+  if h then
+    local path = h:read('*l')
+    h:close()
+    if path and path ~= '' then return path end
+  end
+  return fallback
+end
+
+local tmux_bin = find_bin('tmux', '/opt/homebrew/bin/tmux')
 
 -- Returns true if we're inside a tmux session
 local function in_tmux()
