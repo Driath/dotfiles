@@ -33,10 +33,10 @@ PATH_DISPLAY="#{?${IS_SHELL},󰉋 #{b:pane_current_path},#{pane_current_command}
 
 # --- Window inactive ---
 NOTIF_ICON='#{?#{@notif},#[fg=#{@color-warning}]󱅫 ,}'
-WIN_INACTIVE="#[fg=#{@color-inactive}] #I ${NOTIF_ICON}${PANES_ICON}#[fg=#{@color-text}]${PATH_DISPLAY}"
+WIN_INACTIVE="#[fg=#{@color-inactive}] #I #[fg=#{@color-text}]${PATH_DISPLAY} ${NOTIF_ICON}${PANES_ICON}"
 
 # --- Window active ---
-WIN_ACTIVE="#[fg=#{@color-active}] #I ${PANES_ICON}#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉 ,}#[fg=#{@color-text},bold]${PATH_DISPLAY}"
+WIN_ACTIVE="#[fg=#{@color-active}] #I #[fg=#{@color-text},bold]${PATH_DISPLAY} ${PANES_ICON}#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉 ,}"
 
 # ============================================================
 # Apply to tmux
