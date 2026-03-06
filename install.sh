@@ -41,6 +41,13 @@ mkdir -p "$HOME/.config/ghostty"
 ln -sf "$DOTFILES/.config/ghostty/config" "$HOME/.config/ghostty/config"
 echo "✓ Ghostty"
 
+# Yazi
+mkdir -p "$HOME/.config/yazi"
+for f in "$DOTFILES/.config/yazi"/*; do
+  [ -f "$f" ] && ln -sf "$f" "$HOME/.config/yazi/$(basename "$f")"
+done
+echo "✓ Yazi"
+
 # tmux
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "✓ tmux"
