@@ -2,6 +2,13 @@
 # Toggle yazi sidebar in the current tmux window
 # If a yazi pane exists, kill it and restore layout. Otherwise, split left 30%.
 
+# Ensure Homebrew PATH when run from tmux run-shell (minimal env)
+if ! command -v tmux >/dev/null 2>&1; then
+  for prefix in /opt/homebrew /usr/local; do
+    [ -x "$prefix/bin/brew" ] && eval "$("$prefix/bin/brew" shellenv)" && break
+  done
+fi
+
 TMUX_BIN="$(command -v tmux)"
 YAZI_BIN="$(command -v yazi)"
 
