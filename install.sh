@@ -39,11 +39,11 @@ echo "✓ tmux plugins"
 
 # Screenshot tool
 mkdir -p "$HOME/.local/bin"
-ln -sf "$DOTFILES/.local/bin/screenshot.sh" "$HOME/.local/bin/screenshot.sh"
-ln -sf "$DOTFILES/.local/bin/pane-stats-update.sh" "$HOME/.local/bin/pane-stats-update.sh"
-ln -sf "$DOTFILES/.local/bin/pane-border-format.sh" "$HOME/.local/bin/pane-border-format.sh"
-chmod +x "$HOME/.local/bin/screenshot.sh" "$HOME/.local/bin/pane-stats-update.sh" "$HOME/.local/bin/pane-border-format.sh"
-echo "✓ Screenshot tool"
+for script in "$DOTFILES/.local/bin"/*.sh; do
+  ln -sf "$script" "$HOME/.local/bin/$(basename "$script")"
+  chmod +x "$HOME/.local/bin/$(basename "$script")"
+done
+echo "✓ Scripts (.local/bin)"
 
 # Clipboard paste script
 mkdir -p "$HOME/.local/share/wezterm/clipboard-images"
