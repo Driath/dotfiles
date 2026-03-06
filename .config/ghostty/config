@@ -5,7 +5,7 @@ adjust-cell-height = 5%
 background-opacity = 0.83
 window-padding-x = 0
 window-padding-y = 0
-window-decoration = resize
+window-decoration = auto
 confirm-close-surface = false
 macos-titlebar-style = hidden
 
@@ -42,10 +42,10 @@ keybind = cmd+alt+up=text:\x00k
 keybind = cmd+alt+down=text:\x00j
 
 # Swap panes
-keybind = cmd+alt+shift+left=text:\x00H
-keybind = cmd+alt+shift+right=text:\x00L
-keybind = cmd+alt+shift+up=text:\x00K
-keybind = cmd+alt+shift+down=text:\x00D
+keybind = cmd+alt+shift+left=text:\x00<
+keybind = cmd+alt+shift+right=text:\x00>
+keybind = cmd+alt+shift+up=text:\x00+
+keybind = cmd+alt+shift+down=text:\x00_
 
 # Zoom pane
 keybind = cmd+alt+f=text:\x00z
@@ -57,8 +57,8 @@ keybind = cmd+r=text:\x00S
 keybind = cmd+f=toggle_fullscreen
 
 # Font size
-keybind = cmd+plus=increase_font_size:1
-keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+equal=decrease_font_size:1
+keybind = cmd+minus=increase_font_size:1
 keybind = cmd+zero=reset_font_size
 
 # Quit
@@ -77,7 +77,7 @@ keybind = cmd+n=text:\x00N
 # Cmd+E → toggle yazi
 keybind = cmd+e=text:\x00E
 # Cmd+M → speech-to-text
-keybind = cmd+m=text:\x00M
+keybind = cmd+m=text:\x00m
 # Cmd+Shift+N → new file yazi
 keybind = cmd+shift+n=text:\x00A
 # Cmd+Shift+X → delete yazi

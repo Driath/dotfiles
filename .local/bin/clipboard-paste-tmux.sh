@@ -1,6 +1,7 @@
 #!/bin/zsh
 # Smart clipboard paste for tmux: image → path, text → text
 # Sends the result to the active tmux pane
+export PATH="/opt/homebrew/bin:$PATH"
 
 DIR="$HOME/.local/share/wezterm/clipboard-images"
 mkdir -p "$DIR"
