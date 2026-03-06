@@ -19,13 +19,14 @@ STATUS_LEFT="${SESSION_ICON}${SESSION_NAME}${SESSION_INDEX} ${SEPARATOR}"
 PANE_STATS='#(~/.local/bin/pane-stats-update.sh)'
 PREFIX_INDICATOR='#{?client_prefix,#[fg=#{@color-warning}]󰌌 ,}'
 ZOOM_INDICATOR='#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉  ,}'
+NOTIF_GLOBAL='#{?#(~/.local/bin/notif-count.sh),#[fg=#{@color-warning}]󱥁 #(~/.local/bin/notif-count.sh) ,}'
 STT_REC='#{?#{==:#{@stt_status},rec},#[fg=#{@color-info}]󰍬 #[fg=#{@color-warning}]󰋎 ,}'
 STT_TRANS='#{?#{==:#{@stt_status},trans},#[fg=#{@color-info}]󰍬 #[fg=#{@color-warning}]󰔟 ,}'
 STT_INDICATOR="${STT_REC}${STT_TRANS}"
-SYSTEM_METRICS='#[fg=#{@color-inactive},dim]#(ping -c1 -t1 1.1.1.1 >/dev/null 2>&1 && echo "󰤨" || echo "󰤭") 󰁾 #{battery_percentage}  󰍛 #{cpu_percentage}  󰘚 #{ram_percentage}'
+SYSTEM_METRICS='#[fg=#{@color-inactive},dim]󰍛 #(~/.tmux/plugins/tmux-cpu/scripts/cpu_percentage.sh | sed "s/\.[0-9]*//")  󰘚 #(~/.tmux/plugins/tmux-cpu/scripts/ram_percentage.sh | sed "s/\.[0-9]*//")'
 DATETIME='#[fg=#{@color-inactive}]󰅐 %d/%m  %H:%M'
 
-STATUS_RIGHT="${PANE_STATS}${STT_INDICATOR}${PREFIX_INDICATOR}${ZOOM_INDICATOR}${SYSTEM_METRICS}  ${DATETIME}"
+STATUS_RIGHT="${PANE_STATS}${STT_INDICATOR}${PREFIX_INDICATOR}${ZOOM_INDICATOR}${NOTIF_GLOBAL}${SYSTEM_METRICS}"
 
 # ============================================================
 # WINDOW FORMAT (shared components)
@@ -35,11 +36,11 @@ IS_SHELL='#{||:#{==:#{pane_current_command},zsh},#{||:#{==:#{pane_current_comman
 PATH_DISPLAY="#{?${IS_SHELL},󰉋 #{b:pane_current_path},#{pane_current_command}  󰉋 #{b:pane_current_path}}"
 
 # --- Window inactive ---
-NOTIF_ICON='#{?#{@notif},#[fg=#{@color-warning}]󱅫 ,}'
+NOTIF_ICON='#{?#{@notif},#[fg=#{@color-warning}]󱥁 #{@notif} ,}'
 WIN_INACTIVE="#[fg=#{@color-inactive}] #I #[fg=#{@color-text}]${PATH_DISPLAY} ${NOTIF_ICON}${PANES_ICON}"
 
 # --- Window active ---
-WIN_ACTIVE="#[fg=#{@color-active}] #I #[fg=#{@color-text},bold]${PATH_DISPLAY} ${PANES_ICON}#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉 ,}"
+WIN_ACTIVE="#[fg=#{@color-active}] #I #[fg=#{@color-text},bold]${PATH_DISPLAY} ${NOTIF_ICON}${PANES_ICON}#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉 ,}"
 
 # ============================================================
 # Apply to tmux

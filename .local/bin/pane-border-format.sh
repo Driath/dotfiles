@@ -21,9 +21,9 @@ INACTIVE_GIT=''
 INACTIVE_STATS='#{?#{@pane_cpu},#[fg=#{@color-inactive}]│ 󰍛 #{@pane_cpu} 󰘚 #{@pane_mem} ,}'
 INACTIVE="${INACTIVE_DOT} ${INACTIVE_NAME} ${INACTIVE_PATH} ${INACTIVE_TITLE} ${INACTIVE_GIT}${INACTIVE_STATS}${INACTIVE_DOT}"
 
-# --- Yazi pane (just the dot) ---
-YAZI_ACTIVE="${ACTIVE_DOT}"
-YAZI_INACTIVE="${INACTIVE_DOT}"
+# --- Yazi pane (dot + title) ---
+YAZI_ACTIVE="${ACTIVE_DOT} ${ACTIVE_TITLE}"
+YAZI_INACTIVE="${INACTIVE_DOT} ${INACTIVE_TITLE}"
 YAZI="#{?pane_active,${YAZI_ACTIVE},${YAZI_INACTIVE}}"
 
 # --- Compose final format ---
