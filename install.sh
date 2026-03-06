@@ -9,8 +9,22 @@ echo "Installing dotfiles..."
 echo "Installing dependencies..."
 brew install pngpaste 2>/dev/null || true
 brew install terminal-notifier 2>/dev/null || true
+brew install whisper-cpp sox 2>/dev/null || true
 pip3 install pyobjc-framework-Quartz 2>/dev/null || true
 echo "✓ Dependencies"
+
+# Speech-to-text model (whisper)
+WHISPER_MODEL_DIR="$HOME/.local/share/whisper-cpp"
+WHISPER_MODEL="$WHISPER_MODEL_DIR/ggml-base.bin"
+if [ ! -f "$WHISPER_MODEL" ]; then
+  mkdir -p "$WHISPER_MODEL_DIR"
+  echo "Downloading whisper base model..."
+  curl -L "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin" \
+    -o "$WHISPER_MODEL" 2>/dev/null
+  echo "✓ Whisper model"
+else
+  echo "✓ Whisper model already present"
+fi
 
 # Starship
 mkdir -p "$HOME/.config"
