@@ -45,6 +45,10 @@ keybind = cmd+alt+down=text:\x00j
 keybind = cmd+shift+left=text:\x00{
 keybind = cmd+shift+right=text:\x00}
 
+# Move window to another session
+keybind = cmd+shift+up=text:\x00B
+keybind = cmd+shift+down=text:\x00F
+
 # Swap panes
 keybind = cmd+alt+shift+left=text:\x00<
 keybind = cmd+alt+shift+right=text:\x00>

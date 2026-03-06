@@ -187,6 +187,9 @@ config.keys = {
   -- Cmd+Shift+Left/Right : swap windows
   { key = 'LeftArrow', mods = 'CMD|SHIFT', action = tmux('{') },
   { key = 'RightArrow', mods = 'CMD|SHIFT', action = tmux('}') },
+  -- Cmd+Shift+Up/Down : move window to prev/next session
+  { key = 'UpArrow', mods = 'CMD|SHIFT', action = tmux('B') },
+  { key = 'DownArrow', mods = 'CMD|SHIFT', action = tmux('F') },
   -- Cmd+< / Cmd+> : cycle thèmes
   { key = '<', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, -1) end) },
   { key = '>', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, 1) end) },
