@@ -235,7 +235,11 @@ config.keys = {
   { key = 'Enter', mods = 'SHIFT', action = wezterm.action.SendString('\x1b[13;2u') },
   -- Cmd+E : toggle yazi sidebar
   { key = 'e', mods = 'CMD', action = wezterm.action_callback(function()
-    io.popen(find_bin('tmux', '/opt/homebrew/bin/tmux') .. ' run-shell -b "~/.local/bin/yazi-toggle.sh"')
+    io.popen(tmux_bin .. ' run-shell -b "' .. (HOME or '') .. '/.local/bin/yazi-toggle.sh"')
+  end)},
+  -- Cmd+M : speech-to-text toggle (record / stop+transcribe)
+  { key = 'm', mods = 'CMD', action = wezterm.action_callback(function()
+    io.popen(tmux_bin .. ' run-shell -b "' .. (HOME or '') .. '/.local/bin/speech-to-text.sh"')
   end)},
 }
 

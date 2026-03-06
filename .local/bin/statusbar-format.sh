@@ -19,10 +19,11 @@ STATUS_LEFT="${SESSION_ICON}${SESSION_NAME}${SESSION_INDEX} ${SEPARATOR}"
 PANE_STATS='#(~/.local/bin/pane-stats-update.sh)'
 PREFIX_INDICATOR='#{?client_prefix,#[fg=#{@color-warning}]⌨ ,}'
 ZOOM_INDICATOR='#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉  ,}'
+STT_INDICATOR='#{?#{@stt_status},#[fg=#{@color-warning}]#{@stt_status} ,}'
 SYSTEM_METRICS='#[fg=#{@color-inactive},dim]#{online_status} #{battery_icon_status} #{battery_percentage}  󰍛 #{cpu_percentage}  󰘚 #{ram_percentage}'
 DATETIME='#[fg=#{@color-inactive}]󰅐 %d/%m  %H:%M'
 
-STATUS_RIGHT="${PANE_STATS}${PREFIX_INDICATOR}${ZOOM_INDICATOR}${SYSTEM_METRICS}  ${DATETIME}"
+STATUS_RIGHT="${PANE_STATS}${STT_INDICATOR}${PREFIX_INDICATOR}${ZOOM_INDICATOR}${SYSTEM_METRICS}  ${DATETIME}"
 
 # ============================================================
 # WINDOW FORMAT (shared components)
