@@ -184,6 +184,9 @@ config.keys = {
   -- Cmd+Left/Right : naviguer entre windows tmux
   { key = 'LeftArrow', mods = 'CMD', action = tmux('p') },
   { key = 'RightArrow', mods = 'CMD', action = tmux('n') },
+  -- Cmd+Shift+Left/Right : swap windows
+  { key = 'LeftArrow', mods = 'CMD|SHIFT', action = tmux('{') },
+  { key = 'RightArrow', mods = 'CMD|SHIFT', action = tmux('}') },
   -- Cmd+< / Cmd+> : cycle thèmes
   { key = '<', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, -1) end) },
   { key = '>', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, 1) end) },

@@ -41,6 +41,10 @@ keybind = cmd+alt+right=text:\x00l
 keybind = cmd+alt+up=text:\x00k
 keybind = cmd+alt+down=text:\x00j
 
+# Swap windows
+keybind = cmd+shift+left=text:\x00{
+keybind = cmd+shift+right=text:\x00}
+
 # Swap panes
 keybind = cmd+alt+shift+left=text:\x00<
 keybind = cmd+alt+shift+right=text:\x00>
