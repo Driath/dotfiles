@@ -84,10 +84,11 @@ config.front_end = 'WebGpu'
 config.enable_kitty_graphics = true
 config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.enable_tab_bar = false
-config.window_background_opacity = 0.78
+config.window_background_opacity = 0.83
 config.macos_window_background_blur = 0
 config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
+config.native_macos_fullscreen_mode = true
 
 -- Left option compose (AZERTY : \, |, @, etc.)
 config.send_composed_key_when_left_alt_is_pressed = true
@@ -175,6 +176,42 @@ config.keys = {
     if id then
       io.popen(tmux_bin .. ' switch-client -t ' .. id)
       tmux_refresh()
+    end
+  end)},
+  -- Cmd+Shift+N : nouveau fichier si yazi, sinon nouvelle session tmux
+  { key = 'n', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
+    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
+    local cmd = handle and handle:read('*l') or ''
+    if handle then handle:close() end
+    if cmd == 'yazi' then
+      window:perform_action(wezterm.action.SendKey { key = 'a' }, pane)
+    end
+  end)},
+  -- Cmd+Shift+X : supprimer si yazi
+  { key = 'x', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
+    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
+    local cmd = handle and handle:read('*l') or ''
+    if handle then handle:close() end
+    if cmd == 'yazi' then
+      window:perform_action(wezterm.action.SendKey { key = 'd' }, pane)
+    end
+  end)},
+  -- Cmd+Shift+R : renommer si yazi
+  { key = 'r', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
+    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
+    local cmd = handle and handle:read('*l') or ''
+    if handle then handle:close() end
+    if cmd == 'yazi' then
+      window:perform_action(wezterm.action.SendKey { key = 'r' }, pane)
+    end
+  end)},
+  -- Cmd+Shift+E : edit si yazi
+  { key = 'e', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
+    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
+    local cmd = handle and handle:read('*l') or ''
+    if handle then handle:close() end
+    if cmd == 'yazi' then
+      window:perform_action(wezterm.action.SendKey { key = 'e' }, pane)
     end
   end)},
   -- Cmd+Up/Down : naviguer entre sessions tmux
