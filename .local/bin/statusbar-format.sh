@@ -22,7 +22,7 @@ ZOOM_INDICATOR='#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉  ,}'
 STT_REC='#{?#{==:#{@stt_status},rec},#[fg=#{@color-info}]󰍬 #[fg=#{@color-warning}]󰋎 ,}'
 STT_TRANS='#{?#{==:#{@stt_status},trans},#[fg=#{@color-info}]󰍬 #[fg=#{@color-warning}]󰔟 ,}'
 STT_INDICATOR="${STT_REC}${STT_TRANS}"
-SYSTEM_METRICS='#[fg=#{@color-inactive},dim]#{online_status} #{battery_icon_status} #{battery_percentage}  󰍛 #{cpu_percentage}  󰘚 #{ram_percentage}'
+SYSTEM_METRICS='#[fg=#{@color-inactive},dim]#(ping -c1 -t1 1.1.1.1 >/dev/null 2>&1 && echo "󰤨" || echo "󰤭") 󰁾 #{battery_percentage}  󰍛 #{cpu_percentage}  󰘚 #{ram_percentage}'
 DATETIME='#[fg=#{@color-inactive}]󰅐 %d/%m  %H:%M'
 
 STATUS_RIGHT="${PANE_STATS}${STT_INDICATOR}${PREFIX_INDICATOR}${ZOOM_INDICATOR}${SYSTEM_METRICS}  ${DATETIME}"

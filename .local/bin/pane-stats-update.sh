@@ -1,19 +1,20 @@
 #!/bin/bash
 # Updates @pane_cpu and @pane_mem for all panes in the current window
 
-PANES=$(tmux list-panes -F '#{pane_id} #{pane_pid}' 2>/dev/null)
+PANES=$(tmux list-panes -a -F '#{pane_id} #{pane_pid}' 2>/dev/null)
 [ -z "$PANES" ] && exit 0
 
 echo "$PANES" | while read -r PANE_ID PANE_PID; do
   CHILD=$(ps -axo pid=,ppid=,%cpu=,rss= 2>/dev/null | awk -v ppid="$PANE_PID" '$2 == ppid {print; exit}')
   if [ -z "$CHILD" ]; then
-    tmux set -p -t "$PANE_ID" @pane_cpu "" 2>/dev/null
-    tmux set -p -t "$PANE_ID" @pane_mem "" 2>/dev/null
-    continue
+    # No child process — use the pane process itself (e.g. zsh)
+    CHILD=$(ps -o pid=,%cpu=,rss= -p "$PANE_PID" 2>/dev/null)
+    CPU=$(echo "$CHILD" | awk '{printf "%.0f", $2}')
+    RSS_KB=$(echo "$CHILD" | awk '{print $3}')
+  else
+    CPU=$(echo "$CHILD" | awk '{printf "%.0f", $3}')
+    RSS_KB=$(echo "$CHILD" | awk '{print $4}')
   fi
-
-  CPU=$(echo "$CHILD" | awk '{printf "%.0f", $3}')
-  RSS_KB=$(echo "$CHILD" | awk '{print $4}')
 
   if [ "$RSS_KB" -ge 1048576 ] 2>/dev/null; then
     MEM="$(echo "$RSS_KB" | awk '{printf "%.1f", $1/1048576}')G"
