@@ -17,9 +17,11 @@ STATUS_LEFT="${SESSION_ICON}${SESSION_NAME}${SESSION_INDEX} ${SEPARATOR}"
 # STATUS-RIGHT
 # ============================================================
 PANE_STATS='#(~/.local/bin/pane-stats-update.sh)'
-PREFIX_INDICATOR='#{?client_prefix,#[fg=#{@color-warning}]⌨ ,}'
+PREFIX_INDICATOR='#{?client_prefix,#[fg=#{@color-warning}]󰌌 ,}'
 ZOOM_INDICATOR='#{?window_zoomed_flag,#[fg=#{@color-warning}]󰍉  ,}'
-STT_INDICATOR='#{?#{@stt_status},#[fg=#{@color-warning}]#{@stt_status} ,}'
+STT_REC='#{?#{==:#{@stt_status},rec},#[fg=#{@color-info}]󰍬 #[fg=#{@color-warning}]󰋎 ,}'
+STT_TRANS='#{?#{==:#{@stt_status},trans},#[fg=#{@color-info}]󰍬 #[fg=#{@color-warning}]󰔟 ,}'
+STT_INDICATOR="${STT_REC}${STT_TRANS}"
 SYSTEM_METRICS='#[fg=#{@color-inactive},dim]#{online_status} #{battery_icon_status} #{battery_percentage}  󰍛 #{cpu_percentage}  󰘚 #{ram_percentage}'
 DATETIME='#[fg=#{@color-inactive}]󰅐 %d/%m  %H:%M'
 

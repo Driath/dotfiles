@@ -26,7 +26,7 @@ if [ -f "$PID_FILE" ]; then
 fi
 
 # --- START RECORDING ---
-"$TMUX_BIN" set -g @stt_status "🎙"
+"$TMUX_BIN" set -g @stt_status "rec"
 "$TMUX_BIN" refresh-client -S
 
 # Record immediately, stop after 1.5s of silence
@@ -38,7 +38,7 @@ wait "$!" 2>/dev/null
 rm -f "$PID_FILE"
 
 # --- TRANSCRIBE ---
-"$TMUX_BIN" set -g @stt_status "✍"
+"$TMUX_BIN" set -g @stt_status "trans"
 "$TMUX_BIN" refresh-client -S
 
 if [ -f "$AUDIO_FILE" ]; then
