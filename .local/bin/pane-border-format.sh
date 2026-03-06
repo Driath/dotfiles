@@ -21,9 +21,13 @@ INACTIVE_GIT='#{?GITMUX_REPO,#[fg=#{@color-inactive}]│ 󰘬 #{GITMUX_BRANCH}#{
 INACTIVE_STATS='#{?#{@pane_cpu},#[fg=#{@color-inactive}]│ 󰍛 #{@pane_cpu} 󰘚 #{@pane_mem} ,}'
 INACTIVE="${INACTIVE_DOT} ${INACTIVE_NAME} ${INACTIVE_PATH} ${INACTIVE_TITLE} ${INACTIVE_GIT}${INACTIVE_STATS}${INACTIVE_DOT}"
 
+# --- Yazi pane (just the dot) ---
+YAZI_ACTIVE="${ACTIVE_DOT}"
+YAZI_INACTIVE="${INACTIVE_DOT}"
+YAZI="#{?pane_active,${YAZI_ACTIVE},${YAZI_INACTIVE}}"
+
 # --- Compose final format ---
-# Hide border for yazi panes
 NORMAL="#{?pane_active,${ACTIVE},${INACTIVE}}"
-FORMAT="#{?#{m:yazi,#{pane_current_command}},,${NORMAL}}"
+FORMAT="#{?#{m:yazi,#{pane_current_command}},${YAZI},${NORMAL}}"
 
 tmux set -gw pane-border-format "$FORMAT"

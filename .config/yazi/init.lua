@@ -21,16 +21,3 @@ Status:children_add(function(self)
 	}
 end, 1000, Status.LEFT)
 
--- Right: keybinding hints with nerd icons
-Status:children_add(function()
-	return ui.Line {
-		ui.Span(" a"):fg("cyan"),
-		ui.Span("  "):fg("gray"),
-		ui.Span(" e"):fg("cyan"),
-		ui.Span("  "):fg("gray"),
-		ui.Span(" r"):fg("cyan"),
-		ui.Span("  "):fg("gray"),
-		ui.Span("  d"):fg("cyan"),
-		ui.Span(" "):fg("gray"),
-	}
-end, 1000, Status.RIGHT)
