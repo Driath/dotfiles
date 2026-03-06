@@ -36,6 +36,11 @@ mkdir -p "$HOME/.config/wezterm"
 ln -sf "$DOTFILES/.config/wezterm/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
 echo "✓ WezTerm"
 
+# Ghostty
+mkdir -p "$HOME/.config/ghostty"
+ln -sf "$DOTFILES/.config/ghostty/config" "$HOME/.config/ghostty/config"
+echo "✓ Ghostty"
+
 # tmux
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "✓ tmux"
@@ -105,4 +110,4 @@ else
 fi
 echo "✓ Claude Code notifications"
 
-echo "Done. Restart WezTerm and run: tmux kill-server"
+echo "Done. Restart WezTerm/Ghostty and run: tmux kill-server"
