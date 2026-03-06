@@ -90,5 +90,7 @@ keybind = cmd+shift+x=text:\x00X
 keybind = cmd+shift+r=text:\x00R
 # Cmd+Shift+E → edit yazi
 keybind = cmd+shift+e=text:\x00O
+# Cmd+Shift+T → new window in yazi dir
+keybind = cmd+shift+t=text:\x00T
 # Reload config
 keybind = ctrl+shift+r=reload_config
