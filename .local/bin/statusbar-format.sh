@@ -8,7 +8,7 @@
 # ============================================================
 SESSION_ICON='#[fg=#{@color-active}] '
 SESSION_NAME='#[fg=#{@color-text},dim]#{?#{!=:#S,},#S ,}'
-SESSION_INDEX='#[fg=#{@color-active}]#(tmux list-sessions | grep -n "^$(echo #S):" | cut -d: -f1)#[fg=#{@color-inactive}]/#(tmux list-sessions | wc -l | tr -d " ")'
+SESSION_INDEX='#{?#{>:#{server_sessions},1},#[fg=#{@color-text}]#{@session_index}#[fg=#{@color-inactive}]/#{server_sessions},}'
 SEPARATOR='#[fg=#{@color-separator}]▎ '
 
 STATUS_LEFT="${SESSION_ICON}${SESSION_NAME}${SESSION_INDEX} ${SEPARATOR}"
