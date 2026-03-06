@@ -152,10 +152,10 @@ config.keys = {
     end
   end)},
   -- Cmd+Option+Shift+Arrows : swap pane
-  { key = 'LeftArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{left-of}"') end) },
-  { key = 'RightArrow', mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{right-of}"') end) },
-  { key = 'UpArrow',    mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{up-of}"') end) },
-  { key = 'DownArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action_callback(function() io.popen(tmux_bin .. ' swap-pane -s "{down-of}"') end) },
+  { key = 'LeftArrow',  mods = 'CMD|ALT|SHIFT', action = tmux('<') },
+  { key = 'RightArrow', mods = 'CMD|ALT|SHIFT', action = tmux('>') },
+  { key = 'UpArrow',    mods = 'CMD|ALT|SHIFT', action = tmux('+') },
+  { key = 'DownArrow',  mods = 'CMD|ALT|SHIFT', action = tmux('_') },
   -- Cmd+Option+Arrows : naviguer entre panes tmux
   { key = 'LeftArrow',  mods = 'CMD|ALT', action = tmux('h') },
   { key = 'RightArrow', mods = 'CMD|ALT', action = tmux('l') },
@@ -169,51 +169,15 @@ config.keys = {
   { key = 'd', mods = 'CMD', action = tmux('\\') },
   { key = 'd', mods = 'CMD|SHIFT', action = tmux("'") },
   -- Cmd+N : nouvelle session tmux
-  { key = 'n', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    local handle = io.popen(tmux_bin .. ' new-session -dP -F "#{session_id}"')
-    local id = handle and handle:read('*l') or nil
-    if handle then handle:close() end
-    if id then
-      io.popen(tmux_bin .. ' switch-client -t ' .. id)
-      tmux_refresh()
-    end
-  end)},
-  -- Cmd+Shift+N : nouveau fichier si yazi, sinon nouvelle session tmux
-  { key = 'n', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
-    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
-    local cmd = handle and handle:read('*l') or ''
-    if handle then handle:close() end
-    if cmd == 'yazi' then
-      window:perform_action(wezterm.action.SendKey { key = 'a' }, pane)
-    end
-  end)},
+  { key = 'n', mods = 'CMD', action = tmux('N') },
+  -- Cmd+Shift+N : nouveau fichier si yazi
+  { key = 'n', mods = 'CMD|SHIFT', action = tmux('A') },
   -- Cmd+Shift+X : supprimer si yazi
-  { key = 'x', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
-    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
-    local cmd = handle and handle:read('*l') or ''
-    if handle then handle:close() end
-    if cmd == 'yazi' then
-      window:perform_action(wezterm.action.SendKey { key = 'd' }, pane)
-    end
-  end)},
+  { key = 'x', mods = 'CMD|SHIFT', action = tmux('X') },
   -- Cmd+Shift+R : renommer si yazi
-  { key = 'r', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
-    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
-    local cmd = handle and handle:read('*l') or ''
-    if handle then handle:close() end
-    if cmd == 'yazi' then
-      window:perform_action(wezterm.action.SendKey { key = 'r' }, pane)
-    end
-  end)},
+  { key = 'r', mods = 'CMD|SHIFT', action = tmux('B') },
   -- Cmd+Shift+E : edit si yazi
-  { key = 'e', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window, pane)
-    local handle = io.popen(tmux_bin .. ' display-message -p "#{pane_current_command}"')
-    local cmd = handle and handle:read('*l') or ''
-    if handle then handle:close() end
-    if cmd == 'yazi' then
-      window:perform_action(wezterm.action.SendKey { key = 'e' }, pane)
-    end
-  end)},
+  { key = 'e', mods = 'CMD|SHIFT', action = tmux('O') },
   -- Cmd+Up/Down : naviguer entre sessions tmux
   { key = 'UpArrow', mods = 'CMD', action = tmux('(') },
   { key = 'DownArrow', mods = 'CMD', action = tmux(')') },
@@ -234,13 +198,9 @@ config.keys = {
   -- Shift+Enter
   { key = 'Enter', mods = 'SHIFT', action = wezterm.action.SendString('\x1b[13;2u') },
   -- Cmd+E : toggle yazi sidebar
-  { key = 'e', mods = 'CMD', action = wezterm.action_callback(function()
-    io.popen(tmux_bin .. ' run-shell -b "' .. (HOME or '') .. '/.local/bin/yazi-toggle.sh"')
-  end)},
+  { key = 'e', mods = 'CMD', action = tmux('E') },
   -- Cmd+M : speech-to-text toggle (record / stop+transcribe)
-  { key = 'm', mods = 'CMD', action = wezterm.action_callback(function()
-    io.popen(tmux_bin .. ' run-shell -b "' .. (HOME or '') .. '/.local/bin/speech-to-text.sh"')
-  end)},
+  { key = 'm', mods = 'CMD', action = tmux('m') },
 }
 
 return config

@@ -1,0 +1,88 @@
+# Apparence
+font-family = JetBrainsMono Nerd Font
+font-size = 14
+adjust-cell-height = 5%
+background-opacity = 0.83
+window-padding-x = 0
+window-padding-y = 0
+window-decoration = resize
+confirm-close-surface = false
+macos-titlebar-style = hidden
+
+# Toujours demarrer dans tmux
+command = /bin/zsh -c "tmux attach || tmux new-session"
+
+# Desactiver tabs/splits natifs (tout est dans tmux)
+macos-option-as-alt = left
+
+# Keybindings simples: Cmd → prefix tmux (Ctrl+Space = \x00)
+# Navigation windows
+keybind = cmd+t=text:\x00c
+keybind = cmd+w=text:\x00x
+keybind = cmd+left=text:\x00p
+keybind = cmd+right=text:\x00n
+keybind = cmd+up=text:\x00(
+keybind = cmd+down=text:\x00)
+
+# Onglets AZERTY
+keybind = cmd+physical:one=text:\x001
+keybind = cmd+physical:two=text:\x002
+keybind = cmd+physical:three=text:\x003
+keybind = cmd+physical:four=text:\x004
+keybind = cmd+physical:five=text:\x005
+
+# Splits
+keybind = cmd+d=text:\x00\\
+keybind = cmd+shift+d=text:\x00'
+
+# Navigation panes
+keybind = cmd+alt+left=text:\x00h
+keybind = cmd+alt+right=text:\x00l
+keybind = cmd+alt+up=text:\x00k
+keybind = cmd+alt+down=text:\x00j
+
+# Swap panes
+keybind = cmd+alt+shift+left=text:\x00H
+keybind = cmd+alt+shift+right=text:\x00L
+keybind = cmd+alt+shift+up=text:\x00K
+keybind = cmd+alt+shift+down=text:\x00D
+
+# Zoom pane
+keybind = cmd+alt+f=text:\x00z
+
+# Rename session
+keybind = cmd+r=text:\x00S
+
+# Fullscreen
+keybind = cmd+f=toggle_fullscreen
+
+# Font size
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+zero=reset_font_size
+
+# Quit
+keybind = cmd+q=quit
+
+# Shift+Enter
+keybind = shift+enter=text:\x1b[13;2u
+
+# Complexes: delegues a tmux (prefix + key majuscule custom)
+# Cmd+C → copier/SIGINT conditionnel
+keybind = cmd+c=text:\x00C
+# Cmd+V → clipboard smart
+keybind = cmd+v=text:\x00V
+# Cmd+N → nouvelle session
+keybind = cmd+n=text:\x00N
+# Cmd+E → toggle yazi
+keybind = cmd+e=text:\x00E
+# Cmd+M → speech-to-text
+keybind = cmd+m=text:\x00M
+# Cmd+Shift+N → new file yazi
+keybind = cmd+shift+n=text:\x00A
+# Cmd+Shift+X → delete yazi
+keybind = cmd+shift+x=text:\x00X
+# Cmd+Shift+R → rename yazi
+keybind = cmd+shift+r=text:\x00R
+# Cmd+Shift+E → edit yazi
+keybind = cmd+shift+e=text:\x00O
