@@ -49,7 +49,7 @@ if [ -f "$AUDIO_FILE" ]; then
     | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
   if [ -n "$text" ]; then
-    "$TMUX_BIN" send-keys "$text"
+    "$TMUX_BIN" send-keys "$text" Enter
   fi
   rm -f "$AUDIO_FILE"
 fi
