@@ -1,0 +1,82 @@
+---
+name: tmux-env
+description: "Terminal environment awareness for WezTerm/Ghostty + tmux setup. Triggers when: working with terminal config, keybindings, panes, windows, sessions, statusbar, or when spotting a workflow that could be improved. Also triggers when the user mentions 'notre setup', 'l'environnement', 'le terminal', 'raccourci', or asks to add/modify keybindings."
+---
+
+# tmux-env — Terminal Environment Awareness
+
+You are working inside a **WezTerm or Ghostty + tmux** environment. tmux manages everything (sessions, windows, panes). The terminal emulator is a pure renderer.
+
+## Environment Layout
+
+- **1 session = 1 project** (session name = project name)
+- **Windows/tabs** = work contexts within a project
+- **Prefix** = `Ctrl+Space`
+- **macOS keybindings** (`Cmd+T`, `Cmd+W`, etc.) in WezTerm/Ghostty send tmux commands
+- **Dotfiles repo** = `~/dotfiles` — all config is versioned and reproducible via `install.sh`
+
+## Understanding Your Context
+
+Run these to orient yourself:
+
+```bash
+# Where am I?
+tmux display-message -p '#S'                    # session name (= project)
+tmux list-windows -F '#I:#W'                    # windows in this session
+tmux list-panes -F '#P:#T (#{pane_current_command})'  # panes in current window
+```
+
+## Interacting with tmux
+
+### Reading other panes
+- `tmux capture-pane -t <pane-id> -p` — read content of another pane
+- `tmux capture-pane -t <pane-id> -p -S -50` — last 50 lines
+
+### Acting in other panes
+- `tmux send-keys -t <pane-id> "command" Enter` — run command in another pane
+- `tmux split-window -h` / `-v` — create new pane
+- `tmux new-window -n "name"` — create new window
+
+### Checking bindings
+- `tmux list-keys | grep <key>` — verify a binding exists after config change
+
+## Verification Workflow
+
+When you make a visual change (statusbar, pane borders, icons, etc.):
+
+1. **Before**: use `/screenshot` or `/statusbar` to capture current state
+2. **Make the change** + `tmux source ~/.tmux.conf`
+3. **After**: use `/screenshot` or `/statusbar` to capture new state
+4. **Compare**: describe what changed, confirm it matches intent
+5. **For keybindings**: you can verify with `tmux list-keys`, but ask the user to physically test the shortcut — you can't press keys
+
+Use `/screenshot` and `/statusbar` proactively. Don't ask the user "is it OK?" — look yourself.
+
+## Proposing Improvements
+
+When you notice any of these, **propose** an improvement (don't act without approval):
+
+- A repetitive workflow → propose a keybinding or script
+- A missing IDE-like shortcut → suggest adding it
+- A visual issue in the statusbar → propose a fix
+- A manual multi-step sequence → propose a tmux binding in `~/.tmux.conf` or a script in `~/.local/bin/`
+
+Say: "Ce workflow pourrait être simplifié avec un raccourci dans le dotfiles. On en parle ?"
+
+## Key Paths
+
+| What | Path |
+|------|------|
+| tmux config | `~/dotfiles/tmux/.tmux.conf` |
+| WezTerm config | `~/dotfiles/wezterm/.config/wezterm/wezterm.lua` |
+| Ghostty config | `~/dotfiles/.config/ghostty/config` |
+| Scripts | `~/dotfiles/.local/bin/` |
+| Claude skills | `~/dotfiles/.claude/skills/` |
+| Install script | `~/dotfiles/install.sh` |
+
+## Rules for Editing Configs
+
+- **Never use `sed` or Write tool** on lines with nerd font icons — use Python binary mode
+- **Always reload tmux** after changes: `tmux source ~/.tmux.conf`
+- **All changes must be reproducible** via `install.sh`
+- Changes go in the dotfiles repo, not directly in `~/.tmux.conf`
