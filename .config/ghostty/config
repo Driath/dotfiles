@@ -2,7 +2,8 @@
 font-family = JetBrainsMono Nerd Font
 font-size = 14
 adjust-cell-height = 5%
-background-opacity = 0.83
+background-opacity = 0.7
+background-blur = 0
 window-padding-x = 0
 window-padding-y = 0
 window-decoration = auto
@@ -15,12 +16,6 @@ command = /bin/zsh -c "tmux attach || tmux new-session"
 # Desactiver tabs/splits natifs (tout est dans tmux)
 macos-option-as-alt = left
 
-# Option+Shift+Arrow → Home/End horizontal, move line vertical
-keybind = alt+shift+right=text:\x1bOF
-keybind = alt+shift+left=text:\x1bOH
-# Option+Shift+Up/Down → move line in nvim (sends Alt+arrows)
-keybind = alt+shift+up=text:\x1b[1;3A
-keybind = alt+shift+down=text:\x1b[1;3B
 
 # Cmd+X → cut
 keybind = cmd+x=text:\x18
@@ -112,5 +107,10 @@ keybind = cmd+shift+r=text:\x00R
 keybind = cmd+shift+e=text:\x00O
 # Cmd+Shift+T → new window in yazi dir
 keybind = cmd+shift+t=text:\x00T
+# Theme picker / config editor
+keybind = cmd+p=text:\x00G
+keybind = cmd+shift+p=text:\x00Y
+# Open config (Cmd+, like any macOS app)
+keybind = cmd+comma=open_config
 # Reload config
 keybind = ctrl+shift+r=reload_config
