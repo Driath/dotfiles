@@ -15,6 +15,9 @@ command = /bin/zsh -c "tmux attach || tmux new-session"
 # Desactiver tabs/splits natifs (tout est dans tmux)
 macos-option-as-alt = left
 
+# Cmd+S → save (direct Ctrl+S to nvim)
+keybind = cmd+s=text:\x13
+
 # Keybindings simples: Cmd → prefix tmux (Ctrl+Space = \x00)
 # Navigation windows
 keybind = cmd+t=text:\x00c
