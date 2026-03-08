@@ -1,9 +1,9 @@
 ---
 name: tmux-env
-description: "Terminal environment awareness for WezTerm/Ghostty + tmux setup. Triggers when: working with terminal config, keybindings, panes, windows, sessions, statusbar, or when spotting a workflow that could be improved. Also triggers when the user mentions 'notre setup', 'l'environnement', 'le terminal', 'raccourci', or asks to add/modify keybindings."
+description: "Terminal environment awareness for WezTerm/Ghostty + tmux setup (bawi). Triggers when: working with terminal config, keybindings, panes, windows, sessions, statusbar, or when spotting a workflow that could be improved. Also triggers when the user mentions 'notre setup', 'bawi', 'l'environnement', 'le terminal', 'raccourci', or asks to add/modify keybindings."
 ---
 
-# tmux-env — Terminal Environment Awareness
+# bawi — "Bah oui, j'peux le faire lol"
 
 You are working inside a **WezTerm or Ghostty + tmux** environment. tmux manages everything (sessions, windows, panes). The terminal emulator is a pure renderer.
 
