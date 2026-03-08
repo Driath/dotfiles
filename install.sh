@@ -91,7 +91,10 @@ chmod +x "$HOME/.local/share/claude/notify-done.sh"
 # Claude Code skills
 mkdir -p "$HOME/.claude/skills"
 for skill in "$DOTFILES/.claude/skills"/*/; do
-  [ -d "$skill" ] && ln -sf "$skill" "$HOME/.claude/skills/$(basename "$skill")"
+  [ -d "$skill" ] || continue
+  target="$HOME/.claude/skills/$(basename "$skill")"
+  rm -f "$target" 2>/dev/null
+  ln -sf "$skill" "$target"
 done
 echo "✓ Claude Code skills"
 # Inject Stop hook into ~/.claude/settings.json if not already present
