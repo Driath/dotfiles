@@ -67,12 +67,15 @@ Say: "Ce workflow pourrait être simplifié avec un raccourci dans le dotfiles. 
 
 | What | Path |
 |------|------|
+| Global config | `~/dotfiles/.local/etc/terminal.conf` |
 | tmux config | `~/dotfiles/tmux/.tmux.conf` |
 | WezTerm config | `~/dotfiles/wezterm/.config/wezterm/wezterm.lua` |
 | Ghostty config | `~/dotfiles/.config/ghostty/config` |
 | Scripts | `~/dotfiles/.local/bin/` |
 | Claude skills | `~/dotfiles/.claude/skills/` |
 | Install script | `~/dotfiles/install.sh` |
+
+Read `~/.local/etc/terminal.conf` when you need to know default values (output paths, terminal names, etc.) instead of hardcoding them.
 
 ## Rules for Editing Configs
 

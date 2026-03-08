@@ -11,5 +11,5 @@ Captures the terminal window (Ghostty or WezTerm) and displays it inline.
 ## Steps
 
 1. Run: `~/.local/bin/screenshot.sh`
-2. Read `/tmp/terminal-screenshot.jpg` with the Read tool to display the image.
+2. Read the output file with the Read tool (check `SCREENSHOT_OUT` in `~/.local/etc/terminal.conf` for the path).
 3. Describe what you see — especially the statusbar, pane layout, and any visual issues.

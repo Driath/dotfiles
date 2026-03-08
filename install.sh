@@ -63,7 +63,12 @@ fi
 "$HOME/.tmux/plugins/tpm/bin/install_plugins" 2>/dev/null || true
 echo "✓ tmux plugins"
 
-# Screenshot tool
+# Config
+mkdir -p "$HOME/.local/etc"
+ln -sf "$DOTFILES/.local/etc/terminal.conf" "$HOME/.local/etc/terminal.conf"
+echo "✓ Config (.local/etc)"
+
+# Scripts
 mkdir -p "$HOME/.local/bin"
 for script in "$DOTFILES/.local/bin"/*.sh; do
   ln -sf "$script" "$HOME/.local/bin/$(basename "$script")"

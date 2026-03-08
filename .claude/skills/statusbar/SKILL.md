@@ -6,10 +6,10 @@ user_invocable: true
 
 # Statusbar
 
-Captures just the tmux statusbar (bottom 80px of terminal window).
+Captures just the tmux statusbar (bottom of terminal window).
 
 ## Steps
 
 1. Run: `~/.local/bin/statusbar-capture.sh`
-2. Read `/tmp/statusbar.png` with the Read tool to display the image.
+2. Read the output file with the Read tool (check `STATUSBAR_OUT` in `~/.local/etc/terminal.conf` for the path).
 3. Check: icons, colors, dim/active states, layout left/right.
