@@ -76,8 +76,7 @@ keybind = cmd+q=quit
 keybind = shift+enter=text:\x1b[13;2u
 
 # Complexes: delegues a tmux (prefix + key majuscule custom)
-# Cmd+C → copier/SIGINT conditionnel
-keybind = cmd+c=text:\x00C
+# Cmd+C → native (copy selection or nothing)
 # Cmd+V → clipboard smart
 keybind = cmd+v=text:\x00V
 # Cmd+N → nouvelle session
