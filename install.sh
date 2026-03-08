@@ -48,6 +48,17 @@ for f in "$DOTFILES/.config/yazi"/*; do
 done
 echo "✓ Yazi"
 
+# Neovim
+brew install neovim 2>/dev/null || true
+mkdir -p "$HOME/.config/nvim/lua/config" "$HOME/.config/nvim/lua/plugins"
+for f in "$DOTFILES/.config/nvim/lua/config"/*.lua; do
+  [ -f "$f" ] && ln -sf "$f" "$HOME/.config/nvim/lua/config/$(basename "$f")"
+done
+for f in "$DOTFILES/.config/nvim/lua/plugins"/*.lua; do
+  [ -f "$f" ] && ln -sf "$f" "$HOME/.config/nvim/lua/plugins/$(basename "$f")"
+done
+echo "✓ Neovim"
+
 # tmux
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "✓ tmux"
