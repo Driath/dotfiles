@@ -6,41 +6,10 @@ user_invocable: true
 
 # Statusbar
 
-Captures just the bottom statusbar of the terminal (tmux status line) and displays it for visual inspection.
-
-## How it works
-
-Captures the terminal window (Ghostty or WezTerm), then crops the bottom 80px which contains the tmux statusbar. This gives a high-resolution view of the bar — much easier to read than a full terminal screenshot.
+Captures just the tmux statusbar (bottom 80px of terminal window).
 
 ## Steps
 
-Run this as a single bash command:
-
-```bash
-WID=$(python3 -c "
-import Quartz
-windows = Quartz.CGWindowListCopyWindowInfo(Quartz.kCGWindowListOptionOnScreenOnly, Quartz.kCGNullWindowID)
-for name in ['Ghostty', 'WezTerm']:
-    for w in windows:
-        if name in str(w.get('kCGWindowOwnerName', '')):
-            print(w['kCGWindowNumber'])
-            exit()
-" 2>/dev/null) && \
-screencapture -x -o -l "$WID" -t png /tmp/statusbar-full.png 2>/dev/null && \
-H=$(sips -g pixelHeight /tmp/statusbar-full.png 2>/dev/null | grep pixelHeight | awk '{print $2}') && \
-W=$(sips -g pixelWidth /tmp/statusbar-full.png 2>/dev/null | grep pixelWidth | awk '{print $2}') && \
-OFFSET=$((H - 80)) && \
-sips -c 80 "$W" --cropOffset "$OFFSET" 0 /tmp/statusbar-full.png --out /tmp/statusbar.png >/dev/null 2>&1 && \
-rm /tmp/statusbar-full.png 2>/dev/null && \
-echo "/tmp/statusbar.png ($(du -k /tmp/statusbar.png | cut -f1)KB)"
-```
-
-Then read `/tmp/statusbar.png` with the Read tool to display the image.
-
-## What to look for
-
-- **Left side**: session icon, name, index, separator, window list with icons
-- **Right side**: online status, battery, CPU, RAM, clock
-- **Colors**: should match the design system (@color-* variables)
-- **Icons**: nerd font icons should render correctly, not as letters or boxes
-- **Dim**: inactive windows should be dimmed, active should be normal
+1. Run: `~/.local/bin/statusbar-capture.sh`
+2. Read `/tmp/statusbar.png` with the Read tool to display the image.
+3. Check: icons, colors, dim/active states, layout left/right.
