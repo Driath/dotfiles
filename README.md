@@ -1,17 +1,22 @@
-# dotfiles
+# bawi
 
-WezTerm + tmux setup for macOS — a terminal IDE with ergonomic keybindings, smart statusbar, and Claude Code integration.
+> "Bah oui, j'peux le faire lol"
 
-## Requirements
+A terminal IDE where the AI agent is a first-class citizen. Ghostty/WezTerm + tmux + Claude Code — you give the context, the agent does the rest.
 
-- [WezTerm](https://wezfurlong.org/wezterm/)
-- [tmux](https://github.com/tmux/tmux) — `brew install tmux`
-- [JetBrainsMono Nerd Font](https://www.nerdfonts.com/)
-- [terminal-notifier](https://github.com/julienXX/terminal-notifier) — `brew install terminal-notifier`
-- [tpm](https://github.com/tmux-plugins/tpm) — `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
-- [Starship](https://starship.rs/) — `brew install starship`
-- [pngpaste](https://github.com/jcsalterego/pngpaste) — `brew install pngpaste`
-- Python 3 + pyobjc-framework-Quartz — `pip3 install pyobjc-framework-Quartz`
+## Philosophy
+
+Traditional dotfiles configure a terminal for a human. bawi configures it for a **human-agent team**:
+
+- **You** decide what to build, validate results, test keybindings
+- **The agent** reads the screen, makes changes, verifies visually, iterates autonomously
+- **The setup** bridges both — scripts the agent can call, skills so it understands what it sees, config with zero magic strings
+
+Three layers make this work:
+
+1. **Terminal** — Ghostty/WezTerm as pure renderer, tmux manages everything
+2. **Scripts** — small composable `.sh` files in `~/.local/bin/`, all sourcing a shared config
+3. **Skills** — Claude Code skills that give the agent awareness of the environment
 
 ## Install
 
@@ -21,7 +26,7 @@ cd ~/dotfiles
 ./install.sh
 ```
 
-Then restart WezTerm and run `tmux kill-server`.
+Then restart your terminal and run `tmux kill-server`.
 
 ## Uninstall
 
@@ -30,11 +35,21 @@ cd ~/dotfiles
 ./uninstall.sh
 ```
 
+## Requirements
+
+- [Ghostty](https://ghostty.org/) or [WezTerm](https://wezfurlong.org/wezterm/)
+- [tmux](https://github.com/tmux/tmux) — `brew install tmux`
+- [JetBrainsMono Nerd Font](https://www.nerdfonts.com/)
+- [Starship](https://starship.rs/) — `brew install starship`
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) — `npm install -g @anthropic-ai/claude-code`
+- Python 3 + pyobjc-framework-Quartz — `pip3 install pyobjc-framework-Quartz`
+
 ## Architecture
 
-- **WezTerm** = pure renderer (no native tabs, no default keybindings)
+- **Ghostty/WezTerm** = pure renderer (no native tabs, no default keybindings)
 - **tmux** = manages everything (sessions, windows, panes)
-- macOS keybindings (`Cmd+T`, `Cmd+W`, etc.) in WezTerm send tmux commands
+- **1 session = 1 project**, windows/tabs = work contexts
+- macOS keybindings (`Cmd+T`, `Cmd+W`, etc.) send tmux commands
 - tmux prefix = `Ctrl+Space`
 
 ## Keybindings
@@ -71,21 +86,22 @@ cd ~/dotfiles
 | `Cmd+F` | Toggle fullscreen |
 | `Cmd++/-/0` | Font size |
 | `Cmd+</>` | Cycle themes |
-| `Cmd+Q` | Quit WezTerm |
+| `Cmd+Q` | Quit |
 
 ## Statusbar
 
 ### Left
 - Session icon + name + index/total
+
+### Middle (windows)
 - Window list with smart titles (process or path)
-- Indicators: split pane, notification bell, zoom
+- Indicators: split pane `󰕮`, notification bell `󱥁`, zoom `󰍉`
 
 ### Right
-- Online status
-- Battery icon + percentage
-- CPU percentage
-- RAM percentage
-- Date + time
+- Pane CPU/RAM, STT indicator, prefix, zoom, global notifs, system CPU/RAM
+
+### Pane borders
+Each pane has a title bar showing: `●`/`○` + command + path + title + CPU/RAM stats. The pane title is the pane's live status.
 
 ### Design system
 Semantic color palette using ANSI colors (theme-independent):
@@ -102,32 +118,52 @@ Semantic color palette using ANSI colors (theme-independent):
 | `@color-info` | brightblue | Split indicator |
 | `@color-accent` | brightcyan | Accent elements |
 
+## Agent integration
+
+### Skills
+| Skill | What it does |
+|-------|-------------|
+| `tmux-env` | Environment awareness — the agent knows where it is, what it sees, and how to interact with tmux |
+| `screenshot` | Capture the terminal window for visual inspection |
+| `statusbar` | Capture just the tmux statusbar |
+
+### Scripts
+| Script | What it does |
+|--------|-------------|
+| `terminal-window-id.sh` | Detect active terminal (Ghostty or WezTerm) |
+| `screenshot.sh` | Capture terminal window as JPEG |
+| `statusbar-capture.sh` | Capture tmux statusbar |
+| `statusbar-format.sh` | Generate tmux status-left, status-right, window formats |
+| `pane-border-format.sh` | Generate pane border title format |
+| `pane-stats-update.sh` | Update per-pane CPU/RAM stats |
+| `yazi-toggle.sh` | Toggle yazi file manager sidebar |
+| `speech-to-text.sh` | Voice input via whisper-cpp |
+
+### Config
+All scripts source `~/.local/etc/terminal.conf` — no magic strings.
+
+### Notifications
+- macOS notification when Claude finishes (session/window in title, prompt + response)
+- Click to focus the right tmux pane
+- Bell icon on window until you switch to it
+
 ## Plugins
 
 | Plugin | Description |
 |--------|-------------|
-| [tmux-battery](https://github.com/tmux-plugins/tmux-battery) | Battery percentage + icon |
 | [tmux-cpu](https://github.com/tmux-plugins/tmux-cpu) | CPU + RAM percentage |
-| [tmux-online-status](https://github.com/tmux-plugins/tmux-online-status) | Network connectivity indicator |
 | [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) | Save/restore sessions after reboot |
 | [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) | Auto-save sessions every 15 min |
-
-## Claude Code integration
-
-- **Stop notifications** — macOS notification when Claude finishes (title: session/window, subtitle: your prompt, message: Claude's response)
-- **Click to focus** — clicking the notification switches to the correct tmux session/window/pane
-- **Notification bell** — bell icon on tmux window until you switch to it
-- **Skills** — `/screenshot` and `/statusbar` for visual debugging
 
 ## Files
 
 | Path | Description |
 |------|-------------|
+| `.local/etc/terminal.conf` | Global configuration |
+| `.config/ghostty/config` | Ghostty config |
 | `.config/wezterm/wezterm.lua` | WezTerm config |
 | `tmux/.tmux.conf` | tmux config |
 | `.config/starship.toml` | Starship prompt |
-| `.local/share/wezterm/clipboard-paste.sh` | Smart paste (image/text) |
-| `.local/share/claude/notify-done.sh` | Claude Code Stop hook |
-| `.local/bin/screenshot.sh` | WezTerm screenshot tool |
+| `.local/bin/` | All scripts |
 | `.claude/skills/` | Claude Code skills |
 | `DESIGN.md` | Design system documentation |
