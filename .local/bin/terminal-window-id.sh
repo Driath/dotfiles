@@ -2,7 +2,7 @@
 # Returns the window ID of the active terminal
 . ~/.local/etc/terminal.conf
 
-python3 -c "
+/usr/bin/python3 -c "
 import Quartz
 windows = Quartz.CGWindowListCopyWindowInfo(Quartz.kCGWindowListOptionOnScreenOnly, Quartz.kCGNullWindowID)
 for name in '${TERMINALS}'.split():

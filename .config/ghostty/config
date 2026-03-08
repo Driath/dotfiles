@@ -15,8 +15,21 @@ command = /bin/zsh -c "tmux attach || tmux new-session"
 # Desactiver tabs/splits natifs (tout est dans tmux)
 macos-option-as-alt = left
 
-# Cmd+S → save (direct Ctrl+S to nvim)
+# Option+Shift+Arrow → Home/End horizontal, move line vertical
+keybind = alt+shift+right=text:\x1bOF
+keybind = alt+shift+left=text:\x1bOH
+# Option+Shift+Up/Down → move line in nvim (sends Alt+arrows)
+keybind = alt+shift+up=text:\x1b[1;3A
+keybind = alt+shift+down=text:\x1b[1;3B
+
+# Cmd+X → cut
+keybind = cmd+x=text:\x18
+
+# Cmd+S → save, Cmd+Z → undo, Cmd+Shift+Z → redo, Cmd+A → select all
 keybind = cmd+s=text:\x13
+keybind = cmd+z=text:\x1a
+keybind = cmd+shift+z=text:\x12
+keybind = cmd+a=text:\x01
 
 # Keybindings simples: Cmd → prefix tmux (Ctrl+Space = \x00)
 # Navigation windows
@@ -79,7 +92,8 @@ keybind = cmd+q=quit
 keybind = shift+enter=text:\x1b[13;2u
 
 # Complexes: delegues a tmux (prefix + key majuscule custom)
-# Cmd+C → native (copy selection or nothing)
+# Cmd+C → copy (Ctrl+C to nvim for visual yank, falls back to interrupt)
+keybind = cmd+c=text:\x03
 # Cmd+V → clipboard smart
 keybind = cmd+v=text:\x00V
 # Cmd+N → nouvelle session
