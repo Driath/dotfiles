@@ -82,3 +82,6 @@ vim.keymap.set("v", "<BS>", '"_d', { desc = "Delete selection" })
 
 -- Option+Backspace → delete word backwards (IDE behavior)
 vim.keymap.set("i", "<M-BS>", "<C-w>", { desc = "Delete word back" })
+
+-- Ctrl+Z → suspend (Kitty protocol sends CSI u instead of SIGTSTP)
+vim.keymap.set({ "n", "i", "v" }, "<C-z>", "<Cmd>stop<CR>", { desc = "Suspend" })
