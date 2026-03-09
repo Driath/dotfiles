@@ -89,6 +89,8 @@ config.macos_window_background_blur = 0
 config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
 config.native_macos_fullscreen_mode = true
+config.enable_kitty_keyboard = true
+config.text_background_opacity = 0.2
 
 -- Left option compose (AZERTY : \, |, @, etc.)
 config.send_composed_key_when_left_alt_is_pressed = true
@@ -190,9 +192,9 @@ config.keys = {
   -- Cmd+Shift+Up/Down : move window to prev/next session
   { key = 'UpArrow', mods = 'CMD|SHIFT', action = tmux('B') },
   { key = 'DownArrow', mods = 'CMD|SHIFT', action = tmux('F') },
-  -- Cmd+< / Cmd+> : cycle thèmes
-  { key = '<', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, -1) end) },
-  { key = '>', mods = 'CMD', action = wezterm.action_callback(function(window) cycle_theme(window, 1) end) },
+  -- Cmd+Shift+L / Cmd+Shift+K : cycle thèmes
+  { key = 'l', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window) cycle_theme(window, 1) end) },
+  { key = 'k', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window) cycle_theme(window, -1) end) },
   -- Cmd+Q : ferme WezTerm sans toucher aux sessions tmux
   { key = 'q', mods = 'CMD', action = wezterm.action.QuitApplication },
   -- Cmd++ / Cmd+- / Cmd+0 : zoom
@@ -207,6 +209,27 @@ config.keys = {
   { key = 'e', mods = 'CMD', action = tmux('E') },
   -- Cmd+M : speech-to-text toggle (record / stop+transcribe)
   { key = 'm', mods = 'CMD', action = tmux('m') },
+  -- Cmd → Meta pour Neovim (via tmux kitty-keys)
+  { key = 's', mods = 'CMD', action = wezterm.action.SendString('\x1bs') },
+  { key = 'z', mods = 'CMD', action = wezterm.action.SendString('\x1bz') },
+  { key = 'z', mods = 'CMD|SHIFT', action = wezterm.action.SendString('\x1bZ') },
+  { key = 'a', mods = 'CMD', action = wezterm.action.SendString('\x1ba') },
+  { key = 'x', mods = 'CMD', action = wezterm.action.SendString('\x1bx') },
+  { key = ':', mods = 'CMD', action = wezterm.action.SendString('\x1b:') },
+  -- Cmd+P : find files (Neovim) / fzf (shell)
+  { key = 'p', mods = 'CMD', action = wezterm.action.SendString('\x1bp') },
+  -- Cmd+Shift+P : theme cycling tmux
+  { key = 'p', mods = 'CMD|SHIFT', action = tmux('G') },
+  -- Cmd+Shift+T : new window in yazi dir
+  { key = 't', mods = 'CMD|SHIFT', action = tmux('T') },
+  -- Fix Option+Arrow (CSI sequences)
+  { key = 'LeftArrow', mods = 'ALT', action = wezterm.action.SendString('\x1b[1;3D') },
+  { key = 'RightArrow', mods = 'ALT', action = wezterm.action.SendString('\x1b[1;3C') },
+  { key = 'UpArrow', mods = 'ALT', action = wezterm.action.SendString('\x1b[1;3A') },
+  { key = 'DownArrow', mods = 'ALT', action = wezterm.action.SendString('\x1b[1;3B') },
+  -- Fix Ctrl+Option+Arrow (CSI modifier 7 = Ctrl+Alt)
+  { key = 'LeftArrow', mods = 'CTRL|ALT', action = wezterm.action.SendString('\x1b[1;7D') },
+  { key = 'RightArrow', mods = 'CTRL|ALT', action = wezterm.action.SendString('\x1b[1;7C') },
 }
 
 return config

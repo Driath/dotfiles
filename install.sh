@@ -7,6 +7,7 @@ echo "Installing dotfiles..."
 
 # Dependencies
 echo "Installing dependencies..."
+brew install fd ripgrep 2>/dev/null || true
 brew install pngpaste 2>/dev/null || true
 brew install terminal-notifier 2>/dev/null || true
 brew install whisper-cpp sox 2>/dev/null || true
