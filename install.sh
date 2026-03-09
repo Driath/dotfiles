@@ -50,7 +50,11 @@ echo "✓ Yazi"
 
 # Neovim
 brew install neovim 2>/dev/null || true
-mkdir -p "$HOME/.config/nvim/lua/config" "$HOME/.config/nvim/lua/plugins"
+if [ ! -f "$HOME/.config/nvim/init.lua" ]; then
+  git clone https://github.com/LazyVim/starter "$HOME/.config/nvim" 2>/dev/null
+  rm -rf "$HOME/.config/nvim/.git"
+  echo "✓ LazyVim starter installed"
+fi
 for f in "$DOTFILES/.config/nvim/lua/config"/*.lua; do
   [ -f "$f" ] && ln -sf "$f" "$HOME/.config/nvim/lua/config/$(basename "$f")"
 done
