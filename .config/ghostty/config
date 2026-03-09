@@ -1,10 +1,14 @@
-theme = TokyoNight Night
+theme = TokyoNight
 # Apparence
-font-family = Hack Nerd Font
-font-family = Inconsolata Nerd Font
-font-family = MesloLGS Nerd Font
-font-family = CommitMono Nerd Font
 font-family = GeistMono Nerd Font
+font-family = Hack Nerd Font
+font-family = FiraCode Nerd Font 
+font-family = JetBrainsMono Nerd Font
+font-family = CommitMono Nerd Font
+font-family = MesloLGS Nerd Font
+font-family = SauceCodePro Nerd Font
+font-family = Inconsolata Nerd Font
+font-family = JetBrains Mono
 font-family = BlexMono Nerd Font
 font-family = VictorMono Nerd Font
 font-family = Iosevka Nerd Font
@@ -105,18 +109,18 @@ keybind = cmd+q=quit
 # Complexes: delegues a tmux (prefix + key majuscule custom)
 # Cmd+N → nouvelle session
 keybind = cmd+n=text:\x00N
-# Cmd+E → toggle yazi
-keybind = cmd+e=text:\x00E
+# Cmd+E → neo-tree (Neovim)
+keybind = cmd+e=text:\x1be
 # Cmd+M → speech-to-text
 keybind = cmd+m=text:\x00m
-# Cmd+Shift+N → new file yazi
-keybind = cmd+shift+n=text:\x00A
-# Cmd+Shift+X → delete yazi
-keybind = cmd+shift+x=text:\x00X
-# Cmd+Shift+R → rename yazi
-keybind = cmd+shift+r=text:\x00R
-# Cmd+Shift+E → edit yazi
-keybind = cmd+shift+e=text:\x00O
+# Cmd+Shift+N → libre
+keybind = cmd+shift+n=unbind
+# Cmd+Shift+X → libre
+keybind = cmd+shift+x=unbind
+# Cmd+Shift+R → libre
+keybind = cmd+shift+r=unbind
+# Cmd+Shift+E → libre
+keybind = cmd+shift+e=unbind
 # Cmd+Shift+T → new window in yazi dir
 keybind = cmd+shift+t=text:\x00T
 # Theme picker / config editor
