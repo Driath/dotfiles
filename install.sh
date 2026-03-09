@@ -10,6 +10,7 @@ echo "Installing dependencies..."
 brew install pngpaste 2>/dev/null || true
 brew install terminal-notifier 2>/dev/null || true
 brew install whisper-cpp sox 2>/dev/null || true
+brew install automake autoconf libevent ncurses pkg-config bison utf8proc 2>/dev/null || true
 pip3 install pyobjc-framework-Quartz 2>/dev/null || true
 echo "✓ Dependencies"
 
@@ -81,9 +82,29 @@ for f in "$DOTFILES/.config/nvim/lua/plugins"/*.lua; do
 done
 echo "✓ Neovim"
 
-# tmux
+# tmux (compiled from PR #4912 for Kitty keyboard protocol support)
+if [ ! -x "$HOME/.local/bin/tmux" ]; then
+  echo "Compiling tmux with Kitty keyboard protocol..."
+  TMUX_BUILD="$(mktemp -d)"
+  git clone --depth 1 -b add-kitty-keyboard-protocol-support \
+    https://github.com/sundbp/tmux.git "$TMUX_BUILD" 2>/dev/null
+  cd "$TMUX_BUILD"
+  sh autogen.sh
+  ./configure --prefix="$HOME/.local" \
+    --enable-utf8proc \
+    PKG_CONFIG_PATH="$(brew --prefix libevent)/lib/pkgconfig:$(brew --prefix ncurses)/lib/pkgconfig:$(brew --prefix utf8proc)/lib/pkgconfig" \
+    CFLAGS="-I$(brew --prefix ncurses)/include -I$(brew --prefix utf8proc)/include" \
+    LDFLAGS="-L$(brew --prefix ncurses)/lib -L$(brew --prefix utf8proc)/lib"
+  make -j"$(sysctl -n hw.ncpu)"
+  make install
+  cd "$DOTFILES"
+  rm -rf "$TMUX_BUILD"
+  echo "✓ tmux compiled ($("$HOME/.local/bin/tmux" -V))"
+else
+  echo "✓ tmux already compiled ($("$HOME/.local/bin/tmux" -V))"
+fi
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
-echo "✓ tmux"
+echo "✓ tmux config"
 
 # TPM (tmux plugin manager)
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then

@@ -23,8 +23,8 @@ window-decoration = auto
 confirm-close-surface = false
 macos-titlebar-style = hidden
 
-# Toujours demarrer dans tmux
-command = /bin/zsh -c "$HOME/.local/bin/tmux attach || $HOME/.local/bin/tmux new-session"
+# Toujours demarrer dans tmux (prefer compiled version, fallback to brew)
+command = /bin/zsh -c 'TMUX_BIN="${HOME}/.local/bin/tmux"; [ -x "$TMUX_BIN" ] || TMUX_BIN="$(command -v tmux)"; "$TMUX_BIN" attach || "$TMUX_BIN" new-session'
 
 # Option gauche = Alt (pour raccourcis app), Option droit = caractères spéciaux
 macos-option-as-alt = left
