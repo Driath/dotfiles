@@ -83,11 +83,20 @@ done
 echo "✓ Neovim"
 
 # tmux (compiled from PR #4912 for Kitty keyboard protocol support)
-if [ ! -x "$HOME/.local/bin/tmux" ]; then
-  echo "Compiling tmux with Kitty keyboard protocol..."
+TMUX_BRANCH="add-kitty-keyboard-protocol-support"
+TMUX_REPO="https://github.com/sundbp/tmux.git"
+TMUX_COMMIT_FILE="$HOME/.local/etc/tmux-kitty-commit"
+REMOTE_COMMIT="$(git ls-remote "$TMUX_REPO" "refs/heads/$TMUX_BRANCH" 2>/dev/null | cut -f1)"
+LOCAL_COMMIT="$(cat "$TMUX_COMMIT_FILE" 2>/dev/null)"
+
+if [ ! -x "$HOME/.local/bin/tmux" ] || [ "$REMOTE_COMMIT" != "$LOCAL_COMMIT" ]; then
+  if [ -x "$HOME/.local/bin/tmux" ]; then
+    echo "⚠ tmux kitty-keyboard PR has been updated, recompiling..."
+  else
+    echo "Compiling tmux with Kitty keyboard protocol..."
+  fi
   TMUX_BUILD="$(mktemp -d)"
-  git clone --depth 1 -b add-kitty-keyboard-protocol-support \
-    https://github.com/sundbp/tmux.git "$TMUX_BUILD" 2>/dev/null
+  git clone --depth 1 -b "$TMUX_BRANCH" "$TMUX_REPO" "$TMUX_BUILD" 2>/dev/null
   cd "$TMUX_BUILD"
   sh autogen.sh
   ./configure --prefix="$HOME/.local" \
@@ -99,9 +108,11 @@ if [ ! -x "$HOME/.local/bin/tmux" ]; then
   make install
   cd "$DOTFILES"
   rm -rf "$TMUX_BUILD"
-  echo "✓ tmux compiled ($("$HOME/.local/bin/tmux" -V))"
+  mkdir -p "$(dirname "$TMUX_COMMIT_FILE")"
+  echo "$REMOTE_COMMIT" > "$TMUX_COMMIT_FILE"
+  echo "✓ tmux compiled ($("$HOME/.local/bin/tmux" -V)) — restart tmux: tmux kill-server"
 else
-  echo "✓ tmux already compiled ($("$HOME/.local/bin/tmux" -V))"
+  echo "✓ tmux up to date ($("$HOME/.local/bin/tmux" -V))"
 fi
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "✓ tmux config"
