@@ -1,0 +1,50 @@
+#!/bin/bash
+# Wrapper rm — envoie dans la Trash au lieu de supprimer définitivement
+# Le vrai rm reste accessible via /bin/rm
+
+TRASH="$HOME/.Trash"
+ARGS=()
+TARGETS=()
+FORCE=false
+RECURSIVE=false
+
+# Séparer les flags des cibles
+for arg in "$@"; do
+  case "$arg" in
+    -*) 
+      ARGS+=("$arg")
+      [[ "$arg" == *f* ]] && FORCE=true
+      [[ "$arg" == *r* || "$arg" == *R* ]] && RECURSIVE=true
+      ;;
+    *) TARGETS+=("$arg") ;;
+  esac
+done
+
+# Si aucune cible, laisser passer (affiche l'usage de rm)
+if [ ${#TARGETS[@]} -eq 0 ]; then
+  /bin/rm "$@"
+  exit $?
+fi
+
+# Déplacer chaque cible dans la Trash
+ERRORS=0
+for target in "${TARGETS[@]}"; do
+  if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+    echo "rm: $target: No such file or directory" >&2
+    ERRORS=$((ERRORS + 1))
+    continue
+  fi
+
+  name=$(basename "$target")
+  dest="$TRASH/$name"
+
+  # Éviter les collisions de nom dans la Trash
+  if [ -e "$dest" ]; then
+    dest="$TRASH/${name}_$(date +%s)"
+  fi
+
+  mv "$target" "$dest"
+  echo "→ Trash: $target" >&2
+done
+
+exit $ERRORS

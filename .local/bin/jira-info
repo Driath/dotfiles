@@ -1,0 +1,42 @@
+#!/bin/bash
+# Usage: jira-info APC-626
+# Affiche le titre du ticket et de son parent (si sous-tâche)
+set -euo pipefail
+
+TICKET="${1:-}"
+if [ -z "$TICKET" ]; then
+  echo "Usage: jira-info <TICKET>" >&2
+  exit 1
+fi
+
+ENV_FILE="${HOME}/.config/my-beautiful-project/.env"
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Fichier manquant : $ENV_FILE" >&2
+  exit 1
+fi
+# shellcheck source=/dev/null
+source "$ENV_FILE"
+
+[ -z "${JIRA_EMAIL:-}" ] && echo "met clef api biatch (JIRA_EMAIL manquant dans $ENV_FILE)" >&2 && exit 1
+[ -z "${JIRA_TOKEN:-}" ] && echo "met clef api biatch (JIRA_TOKEN manquant dans $ENV_FILE)" >&2 && exit 1
+
+CLOUD_ID="${JIRA_CLOUD_ID:-64b9707e-7dbf-4ec9-8f85-6f2890c01ba0}"
+EMAIL="${JIRA_EMAIL}"
+TOKEN="${JIRA_TOKEN}"
+
+response=$(curl -s \
+  -u "$EMAIL:$TOKEN" \
+  -H "Accept: application/json" \
+  "https://api.atlassian.com/ex/jira/$CLOUD_ID/rest/api/3/issue/$TICKET?fields=summary,parent,status,issuetype")
+
+TITLE=$(echo "$response" | jq -r '.fields.summary')
+STATUS=$(echo "$response" | jq -r '.fields.status.name')
+TYPE=$(echo "$response" | jq -r '.fields.issuetype.name')
+PARENT_KEY=$(echo "$response" | jq -r '.fields.parent.key // empty')
+PARENT_TITLE=$(echo "$response" | jq -r '.fields.parent.fields.summary // empty')
+
+echo "[$TICKET] $TITLE  ($TYPE · $STATUS)"
+if [ -n "$PARENT_KEY" ]; then
+  PARENT_STATUS=$(echo "$response" | jq -r '.fields.parent.fields.status.name // empty')
+  echo "  └─ [$PARENT_KEY] $PARENT_TITLE  ($PARENT_STATUS)"
+fi
