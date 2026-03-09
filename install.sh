@@ -13,6 +13,24 @@ brew install whisper-cpp sox 2>/dev/null || true
 pip3 install pyobjc-framework-Quartz 2>/dev/null || true
 echo "✓ Dependencies"
 
+# Nerd Fonts
+echo "Installing fonts..."
+brew install --cask \
+  font-geist-mono-nerd-font \
+  font-hack-nerd-font \
+  font-fira-code-nerd-font \
+  font-jetbrains-mono-nerd-font \
+  font-commit-mono-nerd-font \
+  font-meslo-lg-nerd-font \
+  font-sauce-code-pro-nerd-font \
+  font-inconsolata-nerd-font \
+  font-blex-mono-nerd-font \
+  font-victor-mono-nerd-font \
+  font-iosevka-nerd-font \
+  font-maple-mono-nf \
+  2>/dev/null || true
+echo "✓ Fonts"
+
 # Speech-to-text model (whisper)
 WHISPER_MODEL_DIR="$HOME/.local/share/whisper-cpp"
 WHISPER_MODEL="$WHISPER_MODEL_DIR/ggml-base.bin"
