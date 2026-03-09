@@ -1,8 +1,17 @@
+theme = TokyoNight Night
 # Apparence
-font-family = JetBrainsMono Nerd Font
+font-family = Hack Nerd Font
+font-family = Inconsolata Nerd Font
+font-family = MesloLGS Nerd Font
+font-family = CommitMono Nerd Font
+font-family = GeistMono Nerd Font
+font-family = BlexMono Nerd Font
+font-family = VictorMono Nerd Font
+font-family = Iosevka Nerd Font
+font-family = Maple Mono NF
 font-size = 14
 adjust-cell-height = 5%
-background-opacity = 0.7
+background-opacity = 0.66
 background-blur = 0
 window-padding-x = 0
 window-padding-y = 0
@@ -11,22 +20,32 @@ confirm-close-surface = false
 macos-titlebar-style = hidden
 
 # Toujours demarrer dans tmux
-command = /bin/zsh -c "tmux attach || tmux new-session"
+command = /bin/zsh -c "$HOME/.local/bin/tmux attach || $HOME/.local/bin/tmux new-session"
 
-# Desactiver tabs/splits natifs (tout est dans tmux)
+# Option gauche = Alt (pour raccourcis app), Option droit = caractères spéciaux
 macos-option-as-alt = left
 
+# Fix Option+Arrow horizontal (Ghostty sends ^[b/^[f instead of CSI sequences)
+keybind = alt+left=csi:1;3D
+keybind = alt+right=csi:1;3C
 
-# Cmd+X → cut
-keybind = cmd+x=text:\x18
+# ===========================================================================
+# Cmd → Option (Meta) pour les actions éditeur
+# kitty-keys on dans tmux: seul Neovim reçoit les séquences CSI u
+# ===========================================================================
+keybind = cmd+s=text:\x1bs
+keybind = cmd+z=text:\x1bz
+keybind = cmd+shift+z=text:\x1bZ
+keybind = cmd+a=text:\x1ba
+keybind = cmd+x=text:\x1bx
+keybind = cmd+c=text:\x1bc
+keybind = cmd+v=text:\x00V
+keybind = cmd+:=text:\x1b:
 
-# Cmd+S → save, Cmd+Z → undo, Cmd+Shift+Z → redo, Cmd+A → select all
-keybind = cmd+s=text:\x13
-keybind = cmd+z=text:\x1a
-keybind = cmd+shift+z=text:\x12
-keybind = cmd+a=text:\x01
+# ===========================================================================
+# Cmd = tmux/système
+# ===========================================================================
 
-# Keybindings simples: Cmd → prefix tmux (Ctrl+Space = \x00)
 # Navigation windows
 keybind = cmd+t=text:\x00c
 keybind = cmd+w=text:\x00x
@@ -83,14 +102,7 @@ keybind = cmd+zero=reset_font_size
 # Quit
 keybind = cmd+q=quit
 
-# Shift+Enter
-keybind = shift+enter=text:\x1b[13;2u
-
 # Complexes: delegues a tmux (prefix + key majuscule custom)
-# Cmd+C → copy (Ctrl+C to nvim for visual yank, falls back to interrupt)
-keybind = cmd+c=text:\x03
-# Cmd+V → clipboard smart
-keybind = cmd+v=text:\x00V
 # Cmd+N → nouvelle session
 keybind = cmd+n=text:\x00N
 # Cmd+E → toggle yazi
