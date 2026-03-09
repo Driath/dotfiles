@@ -78,15 +78,57 @@ cd ~/dotfiles
 | `Cmd+Alt+Shift+←→↑↓` | Swap panes |
 | `Cmd+Alt+F` | Zoom pane (toggle) |
 
-### Other
+### Swap
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+Shift+←/→` | Swap window left/right |
+| `Cmd+Alt+Shift+←→↑↓` | Swap panes |
+
+### Other (system)
 | Shortcut | Action |
 |----------|--------|
 | `Cmd+C` | Copy (if selection) or Ctrl+C |
 | `Cmd+V` | Paste (images saved as paths) |
 | `Cmd+F` | Toggle fullscreen |
 | `Cmd++/-/0` | Font size |
-| `Cmd+</>` | Cycle themes |
+| `Cmd+Shift+P` | Cycle themes |
+| `Cmd+,` | Open Ghostty config |
+| `Cmd+M` | Speech-to-text |
+| `Cmd+E` | Neo-tree (Neovim) |
+| `Cmd+P` | Find files (Neovim) / fzf (shell) |
 | `Cmd+Q` | Quit |
+
+### Neovim — Navigation
+
+The keybinding layers follow an IDE-like pattern using arrow keys with modifiers.
+
+| Shortcut | Action | Scope |
+|----------|--------|-------|
+| `Arrow` | Char/line movement | Default |
+| `Shift+Arrow` | Visual selection | Default |
+| `Option+←/→` | Jump by word | All modes |
+| `Option+↑/↓` | Jump by function (Treesitter) or paragraph (fallback) | All modes |
+| `Option+Shift+←/→` | Select by word | All modes |
+| `Option+Shift+↑/↓` | Select to prev/next function | All modes |
+| `Ctrl+Option+←/→` | Switch buffer (tab) | All modes |
+
+### Neovim — Editor actions
+
+These map to macOS conventions. `Cmd+key` in Ghostty sends `Meta+key` to Neovim via Kitty protocol.
+
+| Shortcut | Action | Notes |
+|----------|--------|-------|
+| `Cmd+S` | Save | via `Option+S` |
+| `Cmd+Z` | Undo | via `Option+Z` |
+| `Cmd+Shift+Z` | Redo | via `Option+Shift+Z` |
+| `Cmd+A` | Select all | via `Option+A` |
+| `Cmd+C` | Copy to clipboard | via `Option+C` (visual mode) |
+| `Cmd+V` | Paste from clipboard | via `Option+V` |
+| `Cmd+X` | Cut to clipboard | via `Option+X` |
+| `Cmd+:` | Toggle comment | via `Option+:` (AZERTY: `/` = `Shift+:`) |
+| `Option+Backspace` | Delete word backwards | Insert mode |
+| `Backspace` | Delete selection | Visual mode |
+| `Ctrl+Z` | Suspend Neovim | Kitty protocol fix |
 
 ## Statusbar
 

@@ -29,9 +29,14 @@ command = /bin/zsh -c "$HOME/.local/bin/tmux attach || $HOME/.local/bin/tmux new
 # Option gauche = Alt (pour raccourcis app), Option droit = caractères spéciaux
 macos-option-as-alt = left
 
-# Fix Option+Arrow horizontal (Ghostty sends ^[b/^[f instead of CSI sequences)
+# Fix Option+Arrow (Ghostty sends legacy sequences instead of CSI)
 keybind = alt+left=csi:1;3D
 keybind = alt+right=csi:1;3C
+keybind = alt+up=csi:1;3A
+keybind = alt+down=csi:1;3B
+# Fix Ctrl+Option+Arrow (force CSI modifier 7 = Ctrl+Alt)
+keybind = ctrl+alt+left=csi:1;7D
+keybind = ctrl+alt+right=csi:1;7C
 
 # ===========================================================================
 # Cmd → Option (Meta) pour les actions éditeur
@@ -123,9 +128,10 @@ keybind = cmd+shift+r=unbind
 keybind = cmd+shift+e=unbind
 # Cmd+Shift+T → new window in yazi dir
 keybind = cmd+shift+t=text:\x00T
-# Theme picker / config editor
-keybind = cmd+p=text:\x00G
-keybind = cmd+shift+p=text:\x00Y
+# Cmd+P → find files (Neovim) / fzf (shell)
+keybind = cmd+p=text:\x1bp
+# Theme cycling (moved to Cmd+Shift+P)
+keybind = cmd+shift+p=text:\x00G
 # Open config (Cmd+, like any macOS app)
 keybind = cmd+comma=open_config
 # Reload config
