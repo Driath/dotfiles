@@ -136,7 +136,8 @@ echo "✓ Config (.local/etc)"
 
 # Scripts
 mkdir -p "$HOME/.local/bin"
-for script in "$DOTFILES/.local/bin"/*.sh; do
+for script in "$DOTFILES/.local/bin"/*; do
+  [ -f "$script" ] || continue
   ln -sf "$script" "$HOME/.local/bin/$(basename "$script")"
   chmod +x "$HOME/.local/bin/$(basename "$script")"
 done
@@ -168,6 +169,24 @@ for skill in "$DOTFILES/.claude/skills"/*/; do
   ln -sf "$skill" "$target"
 done
 echo "✓ Claude Code skills"
+
+# Claude Code commands
+mkdir -p "$HOME/.claude/commands"
+for cmd in "$DOTFILES/.claude/commands"/*.md; do
+  [ -f "$cmd" ] || continue
+  ln -sf "$cmd" "$HOME/.claude/commands/$(basename "$cmd")"
+done
+echo "✓ Claude Code commands"
+
+# Config perso (env template only — copier .env.example en .env et remplir)
+mkdir -p "$HOME/.config/my-beautiful-project"
+if [ ! -f "$HOME/.config/my-beautiful-project/.env" ]; then
+  cp "$DOTFILES/.config/my-beautiful-project/.env.example" "$HOME/.config/my-beautiful-project/.env"
+  chmod 600 "$HOME/.config/my-beautiful-project/.env"
+  echo "⚠ ~/.config/my-beautiful-project/.env créé depuis .env.example — renseigner JIRA_EMAIL et JIRA_TOKEN"
+else
+  echo "✓ ~/.config/my-beautiful-project/.env déjà présent"
+fi
 # Inject Stop hook into ~/.claude/settings.json if not already present
 if [ -f "$HOME/.claude/settings.json" ]; then
   python3 -c "
