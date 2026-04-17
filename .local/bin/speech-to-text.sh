@@ -51,9 +51,11 @@ if [ -f "$AUDIO_FILE" ]; then
 
   if [ -n "$text" ]; then
     if [ -n "$1" ]; then
-      "$TMUX_BIN" send-keys -t "$1" "$text" Enter
+      "$TMUX_BIN" send-keys -t "$1" -l -- "$text"
+      "$TMUX_BIN" send-keys -t "$1" Enter
     else
-      "$TMUX_BIN" send-keys "$text" Enter
+      "$TMUX_BIN" send-keys -l -- "$text"
+      "$TMUX_BIN" send-keys Enter
     fi
   fi
   rm -f "$AUDIO_FILE"
