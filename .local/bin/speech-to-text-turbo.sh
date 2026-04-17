@@ -12,10 +12,9 @@ fi
 TMUX_BIN="$(command -v tmux)"
 SOX_BIN="$(command -v sox)"
 WHISPER_BIN="$(command -v whisper-cli)"
-AUDIO_FILE="/tmp/stt-recording.wav"
-PID_FILE="/tmp/stt-recording.pid"
+AUDIO_FILE="/tmp/stt-turbo-recording.wav"
+PID_FILE="/tmp/stt-turbo-recording.pid"
 MODEL_PATH="$HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin"
-[ -f "$MODEL_PATH" ] || MODEL_PATH="$HOME/.local/share/whisper-cpp/ggml-base.bin"
 
 # If already recording, cancel
 if [ -f "$PID_FILE" ]; then
