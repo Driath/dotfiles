@@ -1,0 +1,9 @@
+[credential]
+	helper = osxkeychain
+[user]
+	name = Matthieu CZESKI
+	email = matthieu.czeski@gmail.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true

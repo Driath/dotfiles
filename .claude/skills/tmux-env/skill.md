@@ -99,7 +99,8 @@ Read `~/.local/etc/terminal.conf` when you need to know default values (output p
 
 ## Rules for Editing Configs
 
-- **Never use `sed` or Write tool** on lines with nerd font icons — use Python binary mode
+See `~/dotfiles/CLAUDE.md` for the authoritative rules (nerd font safety, Python binary mode, etc.).
+
 - **Always reload tmux** after changes: `tmux source ~/.tmux.conf`
 - **All changes must be reproducible** via `install.sh`
 - Changes go in the dotfiles repo, not directly in `~/.tmux.conf`

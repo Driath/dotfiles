@@ -11,7 +11,7 @@ brew install fd ripgrep 2>/dev/null || true
 brew install pngpaste 2>/dev/null || true
 brew install terminal-notifier 2>/dev/null || true
 brew install whisper-cpp sox 2>/dev/null || true
-brew install automake autoconf libevent ncurses pkg-config bison utf8proc 2>/dev/null || true
+brew install tmux 2>/dev/null || true
 pip3 install pyobjc-framework-Quartz 2>/dev/null || true
 echo "✓ Dependencies"
 
@@ -45,6 +45,12 @@ if [ ! -f "$WHISPER_MODEL" ]; then
 else
   echo "✓ Whisper model already present"
 fi
+
+# Shell + git
+ln -sf "$DOTFILES/.zshrc" "$HOME/.zshrc"
+echo "✓ .zshrc"
+ln -sf "$DOTFILES/.gitconfig" "$HOME/.gitconfig"
+echo "✓ .gitconfig"
 
 # Starship
 mkdir -p "$HOME/.config"
@@ -83,38 +89,6 @@ for f in "$DOTFILES/.config/nvim/lua/plugins"/*.lua; do
 done
 echo "✓ Neovim"
 
-# tmux (compiled from PR #4912 for Kitty keyboard protocol support)
-TMUX_BRANCH="add-kitty-keyboard-protocol-support"
-TMUX_REPO="https://github.com/sundbp/tmux.git"
-TMUX_COMMIT_FILE="$HOME/.local/etc/tmux-kitty-commit"
-REMOTE_COMMIT="$(git ls-remote "$TMUX_REPO" "refs/heads/$TMUX_BRANCH" 2>/dev/null | cut -f1)"
-LOCAL_COMMIT="$(cat "$TMUX_COMMIT_FILE" 2>/dev/null)"
-
-if [ ! -x "$HOME/.local/bin/tmux" ] || [ "$REMOTE_COMMIT" != "$LOCAL_COMMIT" ]; then
-  if [ -x "$HOME/.local/bin/tmux" ]; then
-    echo "⚠ tmux kitty-keyboard PR has been updated, recompiling..."
-  else
-    echo "Compiling tmux with Kitty keyboard protocol..."
-  fi
-  TMUX_BUILD="$(mktemp -d)"
-  git clone --depth 1 -b "$TMUX_BRANCH" "$TMUX_REPO" "$TMUX_BUILD" 2>/dev/null
-  cd "$TMUX_BUILD"
-  sh autogen.sh
-  ./configure --prefix="$HOME/.local" \
-    --enable-utf8proc \
-    PKG_CONFIG_PATH="$(brew --prefix libevent)/lib/pkgconfig:$(brew --prefix ncurses)/lib/pkgconfig:$(brew --prefix utf8proc)/lib/pkgconfig" \
-    CFLAGS="-I$(brew --prefix ncurses)/include -I$(brew --prefix utf8proc)/include" \
-    LDFLAGS="-L$(brew --prefix ncurses)/lib -L$(brew --prefix utf8proc)/lib"
-  make -j"$(sysctl -n hw.ncpu)"
-  make install
-  cd "$DOTFILES"
-  rm -rf "$TMUX_BUILD"
-  mkdir -p "$(dirname "$TMUX_COMMIT_FILE")"
-  echo "$REMOTE_COMMIT" > "$TMUX_COMMIT_FILE"
-  echo "✓ tmux compiled ($("$HOME/.local/bin/tmux" -V)) — restart tmux: tmux kill-server"
-else
-  echo "✓ tmux up to date ($("$HOME/.local/bin/tmux" -V))"
-fi
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "✓ tmux config"
 
@@ -191,4 +165,16 @@ else
 fi
 echo "✓ Claude Code notifications"
 
-echo "Done. Restart WezTerm/Ghostty and run: tmux kill-server"
+# Claude Code — agent teams tmux mode
+python3 -c "
+import json
+path = '$HOME/.claude/settings.json'
+with open(path) as f:
+    s = json.load(f)
+s.setdefault('env', {})['CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS'] = '1'
+with open(path, 'w') as f:
+    json.dump(s, f, indent=2)
+print('✓ Claude agent teams enabled')
+" 2>/dev/null || echo "⚠ ~/.claude/settings.json not found, skipping"
+
+echo "Done. Restart Ghostty/WezTerm and run: tmux kill-server"

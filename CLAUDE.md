@@ -17,13 +17,22 @@
 - Pour recharger tmux sans demander : `tmux source ~/.tmux.conf`
 
 ### Architecture
-- **WezTerm** = renderer pur (pas de tabs natifs, pas de keybindings par défaut)
-- **tmux** = gère tout (sessions, windows, panes)
-- Les keybindings macOS (`Cmd+T`, `Cmd+W`, etc.) dans WezTerm envoient des commandes tmux
-- Prefix tmux = `Ctrl+Space`
+- **Ghostty** = terminal primaire (keybindings via CSI user-keys `\x1b[900~..\x1b[931~`)
+- **WezTerm** = terminal secondaire (dual, en cours d'alignement sur les mêmes user-keys)
+- **tmux** = gère tout (sessions, windows, panes) — Prefix = `Ctrl+Space`
+- Les keybindings macOS (`Cmd+T`, `Cmd+W`, etc.) dans les deux terminaux envoient des séquences CSI qui sont interceptées par tmux root table et routées vers `bawi`
+
+### bawi — CLI d'abstraction tmux
+- Projet : `~/Projects/bawi` (Rust)
+- Binaire : `~/.local/bin/bawi` (symlink vers `~/Projects/bawi/target/release/bawi`)
+- Remplace les appels tmux directs dans Ghostty/WezTerm/scripts
+- `bawi pane nav left/right/up/down` → `tmux select-pane` direct (pas de send-keys)
+- L'app Android SSH appellera `bawi` pour contrôler tmux sans interférer avec le terminal
+- Config mobile : `~/.config/bawi/mobile.toml`
 
 ### Paths importants
-- Config WezTerm : `~/.config/wezterm/wezterm.lua`
+- Config Ghostty : `~/.config/ghostty/config` (primaire)
+- Config WezTerm : `~/.config/wezterm/wezterm.lua` (secondaire)
 - Config tmux : `~/.tmux.conf`
-- Script clipboard : `~/.local/share/wezterm/clipboard-paste.sh`
+- Script clipboard : `~/.local/bin/clipboard-paste-tmux.sh`
 - tmux binaire : `$(command -v tmux)`

@@ -114,7 +114,7 @@ cat > "$FOCUS_SCRIPT" << SCRIPT
 $TMUX_BIN switch-client -t '${TMUX_SESSION}' 2>/dev/null
 $TMUX_BIN select-window -t '${TMUX_SESSION}:${TMUX_WINDOW}' 2>/dev/null
 $TMUX_BIN select-pane -t '${TMUX_PANE_ID}' 2>/dev/null
-open -a WezTerm 2>/dev/null
+open -a "$TERM_PROGRAM" 2>/dev/null || true
 SCRIPT
 chmod +x "$FOCUS_SCRIPT"
 

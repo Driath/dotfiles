@@ -1,8 +1,8 @@
-theme = TokyoNight Night
+theme = TokyoNight
 # Apparence
 font-family = GeistMono Nerd Font
 font-family = Hack Nerd Font
-font-family = FiraCode Nerd Font 
+font-family = FiraCode Nerd Font
 font-family = JetBrainsMono Nerd Font
 font-family = CommitMono Nerd Font
 font-family = MesloLGS Nerd Font
@@ -15,7 +15,7 @@ font-family = Iosevka Nerd Font
 font-family = Maple Mono NF
 font-size = 14
 adjust-cell-height = 5%
-background-opacity = 0.66
+background-opacity = 0.85
 background-opacity-cells = true
 background-blur = 0
 window-padding-x = 0
@@ -25,23 +25,18 @@ confirm-close-surface = false
 macos-titlebar-style = hidden
 
 # Toujours demarrer dans tmux (prefer compiled version, fallback to brew)
-command = /bin/zsh -c 'TMUX_BIN="${HOME}/.local/bin/tmux"; [ -x "$TMUX_BIN" ] || TMUX_BIN="$(command -v tmux)"; "$TMUX_BIN" attach || "$TMUX_BIN" new-session'
+command = /bin/zsh -c 'TMUX_BIN="${HOME}/.local/bin/tmux"; [ -x "$TMUX_BIN" ] || TMUX_BIN="$(command -v tmux)"; "$TMUX_BIN" new-session'
 
 # Option gauche = Alt (pour raccourcis app), Option droit = caractères spéciaux
 macos-option-as-alt = left
 
-# Fix Option+Arrow (Ghostty sends legacy sequences instead of CSI)
-keybind = alt+left=csi:1;3D
-keybind = alt+right=csi:1;3C
+# Fix Option+Up/Down (Ghostty doesn't send CSI natively for these)
 keybind = alt+up=csi:1;3A
 keybind = alt+down=csi:1;3B
-# Fix Ctrl+Option+Arrow (force CSI modifier 7 = Ctrl+Alt)
-keybind = ctrl+alt+left=csi:1;7D
-keybind = ctrl+alt+right=csi:1;7C
+
 
 # ===========================================================================
 # Cmd → Option (Meta) pour les actions éditeur
-# kitty-keys on dans tmux: seul Neovim reçoit les séquences CSI u
 # ===========================================================================
 keybind = cmd+s=text:\x1bs
 keybind = cmd+z=text:\x1bz
@@ -105,12 +100,12 @@ keybind = cmd+r=text:\x1b[926~
 # Session create
 keybind = cmd+n=text:\x1b[927~
 
-# Fullscreen
-keybind = cmd+f=toggle_fullscreen
+# Fullscreen (natif macOS)
+keybind = cmd+f=unbind
 
 # Font size
-keybind = cmd+equal=decrease_font_size:1
-keybind = cmd+minus=increase_font_size:1
+keybind = cmd+equal=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
 keybind = cmd+zero=reset_font_size
 
 # Quit
@@ -120,7 +115,7 @@ keybind = cmd+e=text:\x1be
 # Cmd+M → speech-to-text
 keybind = cmd+m=text:\x00m
 # Cmd+Shift+N → libre
-keybind = cmd+shift+n=unbind
+keybind = cmd+shift+n=new_window
 # Cmd+Shift+X → libre
 keybind = cmd+shift+x=unbind
 # Cmd+Shift+R → libre
@@ -134,8 +129,13 @@ keybind = cmd+p=text:\x1bp
 # Theme cycling
 keybind = cmd+shift+l=text:\x00G
 keybind = cmd+shift+k=text:\x00Y
+# Font cycling
+keybind = cmd+shift+i=text:\x1b[928~
+keybind = cmd+shift+o=text:\x1b[929~
+# Opacity
+keybind = cmd+shift+u=text:\x1b[930~
+keybind = cmd+shift+j=text:\x1b[931~
 # Open config (Cmd+, like any macOS app)
 keybind = cmd+comma=open_config
 # Reload config
 keybind = ctrl+shift+r=reload_config
-
