@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import sys
 
 # --- Nerd Font glyphs (FiraMono NF / JetBrainsMono NF) ---
@@ -9,6 +10,7 @@ IC_CTX = ""       # database     -> context window
 IC_COST = ""      # dollar       -> cost
 IC_MODEL = ""     # microchip    -> model
 IC_EFFORT = ""    # tachometer   -> effort
+IC_DIR = ""        # folder       -> current path
 
 # --- 256-color ANSI ---
 def c(code, s):
@@ -37,6 +39,18 @@ def main():
 
     parts = []
     rl = d.get("rate_limits", {}) or {}
+
+    # current path (home-relative, last 2 segments if deep)
+    cwd = d.get("cwd") or (d.get("workspace") or {}).get("current_dir") or ""
+    if cwd:
+        home = os.path.expanduser("~")
+        root = "~" if cwd.startswith(home) else ""
+        tail = cwd[len(home):] if cwd.startswith(home) else cwd
+        segs = [s for s in tail.split("/") if s]
+        # fish-style: abbreviate every ancestor to its first char, keep last full
+        disp = "/".join([s[0] for s in segs[:-1]] + segs[-1:]) if segs else ""
+        disp = (root + "/" + disp).rstrip("/") if disp else (root or "/")
+        parts.append(c(ICON, IC_DIR) + " " + c(TEXT, disp))
 
     # model
     name = (d.get("model") or {}).get("display_name", "")
