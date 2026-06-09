@@ -46,3 +46,19 @@ alias super-claude='claude --dangerously-skip-permissions'
 
 # opencode
 export PATH=/Users/matthieuczeski/.opencode/bin:$PATH
+
+# smux tmux-bridge (manually installed — CLI only, not the tmux.conf)
+export PATH="$HOME/.smux/bin:$PATH"
+
+# DeepSeek API key (shared with claude-deepseek launcher)
+[ -f ~/.config/claude-deepseek/env ] && set -a && source ~/.config/claude-deepseek/env && set +a
+export NEXT_BROWSER_HEADLESS=1
+
+# agent-browser default flags (suppress Chrome automation banner)
+export AGENT_BROWSER_FLAGS="--auto-connect --headed"
+alias ab='agent-browser $AGENT_BROWSER_FLAGS open'
+alias ab-snapshot='agent-browser snapshot -i'
+alias ab-click='agent-browser click'
+
+# Dia browser with CDP for agent-browser
+alias dia='open -a Dia --args --remote-debugging-port=9222 --disable-features=CalculateNativeWinOcclusion --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding'
