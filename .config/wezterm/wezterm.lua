@@ -140,7 +140,11 @@ config.default_prog = { '/bin/zsh', '-c', tmux_bin .. ' new-session' }
 
 -- Apparence
 -- config.color_scheme = 'Catppuccin Mocha'
-config.font = wezterm.font 'JetBrainsMono Nerd Font'
+config.font = wezterm.font_with_fallback {
+  { family = 'JetBrainsMono Nerd Font', weight = 'Regular' },
+  'Symbols Nerd Font Mono',
+  'Apple Color Emoji',
+}
 config.font_size = 14
 config.line_height = 1.05
 config.front_end = 'WebGpu'
