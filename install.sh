@@ -92,6 +92,11 @@ echo "✓ Neovim"
 ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "✓ tmux config"
 
+# Claude Code statusline (global, all projects)
+mkdir -p "$HOME/.claude"
+ln -sf "$DOTFILES/.claude/statusline.py" "$HOME/.claude/statusline.py"
+echo "✓ Claude statusline"
+
 # TPM (tmux plugin manager)
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
   git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm" 2>/dev/null
@@ -176,5 +181,21 @@ with open(path, 'w') as f:
     json.dump(s, f, indent=2)
 print('✓ Claude agent teams enabled')
 " 2>/dev/null || echo "⚠ ~/.claude/settings.json not found, skipping"
+
+# Claude Code — point statusLine at the dotfiles-managed script
+python3 -c "
+import json
+path = '$HOME/.claude/settings.json'
+with open(path) as f:
+    s = json.load(f)
+cmd = 'python3 \"$HOME/.claude/statusline.py\"'
+if s.get('statusLine', {}).get('command') != cmd:
+    s['statusLine'] = {'type': 'command', 'command': cmd}
+    with open(path, 'w') as f:
+        json.dump(s, f, indent=2)
+    print('✓ Claude statusLine wired')
+else:
+    print('✓ Claude statusLine already wired')
+" 2>/dev/null || echo "⚠ ~/.claude/settings.json not found, skipping statusLine"
 
 echo "Done. Restart Ghostty/WezTerm and run: tmux kill-server"
