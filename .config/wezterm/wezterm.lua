@@ -154,8 +154,10 @@ config.window_padding = { left = '1cell', right = '1cell', top = '0.5cell', bott
 config.enable_tab_bar = false
 config.window_background_opacity = 0.7
 config.macos_window_background_blur = 0
-config.window_decorations = 'TITLE | RESIZE'
+config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
+-- true = fullscreen natif macOS : Space dédié, menu bar cachée (reveal au
+-- survol), contenu sous la safe-area donc 38 pt de bande notch noircie.
 config.native_macos_fullscreen_mode = true
 config.enable_kitty_keyboard = true
 config.text_background_opacity = 0.2
@@ -188,6 +190,9 @@ config.keys = {
   { key = '(', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
     window:perform_action(tmux('5'), pane)
   end)},
+  -- Cmd+Shift+R : recharge la config. `disable_default_key_bindings = true`
+  -- retire le binding par défaut, donc il n'existait plus du tout.
+  { key = 'r', mods = 'CMD|SHIFT', action = wezterm.action.ReloadConfiguration },
   -- Cmd+, : ouvre la config
   { key = ',', mods = 'CMD', action = wezterm.action.SpawnCommandInNewTab {
     args = { '/bin/zsh', '-c', 'open ' .. (HOME or '') .. '/.config/wezterm/wezterm.lua' },
@@ -383,6 +388,19 @@ wezterm.on('format-window-title', function(tab)
 
   if #parts == 0 then return 'wezterm' end
   return table.concat(parts, '  ·  ')
+end)
+
+-- PROBE TEMPORAIRE — à retirer
+wezterm.on('window-config-reloaded', function(window, pane)
+  local ok, err = pcall(function()
+    local f = io.open('/private/tmp/claude-501/-Users-matthieuczeski-Projects/a0f40342-a9a0-445d-b789-2042f1cb66ba/scratchpad/wz-probe.json', 'w')
+    f:write(wezterm.json_encode({
+      screens = wezterm.gui.screens(),
+      dims = window:get_dimensions(),
+    }))
+    f:close()
+  end)
+  if not ok then wezterm.log_error('probe: ' .. tostring(err)) end
 end)
 
 return config
