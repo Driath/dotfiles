@@ -135,8 +135,9 @@ end
 
 local config = wezterm.config_builder()
 
--- Démarre toujours dans tmux
-config.default_prog = { '/bin/zsh', '-c', tmux_bin .. ' new-session' }
+-- Shell direct, sans tmux, toujours dans ~/
+config.default_prog = { '/bin/zsh', '-l' }
+config.default_cwd = wezterm.home_dir
 
 -- Apparence
 -- config.color_scheme = 'Catppuccin Mocha'
@@ -149,11 +150,11 @@ config.font_size = 14
 config.line_height = 1.05
 config.front_end = 'WebGpu'
 config.enable_kitty_graphics = true
-config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+config.window_padding = { left = '1cell', right = '1cell', top = '0.5cell', bottom = '0.5cell' }
 config.enable_tab_bar = false
 config.window_background_opacity = 0.7
 config.macos_window_background_blur = 0
-config.window_decorations = 'RESIZE'
+config.window_decorations = 'TITLE | RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
 config.native_macos_fullscreen_mode = true
 config.enable_kitty_keyboard = true
@@ -169,14 +170,8 @@ config.disable_default_key_bindings = true
 config.keys = {
   -- Cmd+T : nouvelle window tmux (direct, sans condition)
   { key = 't', mods = 'CMD', action = tmux('c') },
-  -- Cmd+W : ferme la window tmux (sans confirmation)
-  { key = 'w', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    if in_tmux() then
-      window:perform_action(wezterm.action.SendString("\x00x"), pane)
-    else
-      window:perform_action(wezterm.action.CloseCurrentPane { confirm = false }, pane)
-    end
-  end)},
+  -- Cmd+W : ferme le pane WezTerm natif (sans confirmation)
+  { key = 'w', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
   -- Raccourcis onglets AZERTY (naviguent entre windows tmux)
   { key = '&', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
     window:perform_action(tmux('1'), pane)
@@ -220,23 +215,25 @@ config.keys = {
       window:perform_action(wezterm.action.SendString(result), pane)
     end
   end)},
-  -- Cmd+Option+Shift+Arrows : swap pane
-  { key = 'LeftArrow',  mods = 'CMD|ALT|SHIFT', action = tmux('<') },
-  { key = 'RightArrow', mods = 'CMD|ALT|SHIFT', action = tmux('>') },
-  { key = 'UpArrow',    mods = 'CMD|ALT|SHIFT', action = tmux('+') },
-  { key = 'DownArrow',  mods = 'CMD|ALT|SHIFT', action = tmux('_') },
-  -- Cmd+Option+Arrows : naviguer entre panes tmux
-  { key = 'LeftArrow',  mods = 'CMD|ALT', action = tmux('h') },
-  { key = 'RightArrow', mods = 'CMD|ALT', action = tmux('l') },
-  { key = 'UpArrow',    mods = 'CMD|ALT', action = tmux('k') },
-  { key = 'DownArrow',  mods = 'CMD|ALT', action = tmux('j') },
+  -- Cmd+Option+Shift+Arrows : redimensionner le pane natif
+  { key = 'LeftArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Left', 3 } },
+  { key = 'RightArrow', mods = 'CMD|ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Right', 3 } },
+  { key = 'UpArrow',    mods = 'CMD|ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Up', 3 } },
+  { key = 'DownArrow',  mods = 'CMD|ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Down', 3 } },
+  -- Cmd+Option+Arrows : naviguer entre panes natifs
+  { key = 'LeftArrow',  mods = 'CMD|ALT', action = wezterm.action.ActivatePaneDirection 'Left' },
+  { key = 'RightArrow', mods = 'CMD|ALT', action = wezterm.action.ActivatePaneDirection 'Right' },
+  { key = 'UpArrow',    mods = 'CMD|ALT', action = wezterm.action.ActivatePaneDirection 'Up' },
+  { key = 'DownArrow',  mods = 'CMD|ALT', action = wezterm.action.ActivatePaneDirection 'Down' },
   -- Cmd+R : renommer la session tmux
   { key = 'r', mods = 'CMD', action = tmux('S') },
-  -- Cmd+Alt+F : zoom/dézoom pane tmux
-  { key = 'f', mods = 'CMD|ALT', action = tmux('z') },
-  -- Cmd+D : split horizontal / Cmd+Shift+D : split vertical
-  { key = 'd', mods = 'CMD', action = tmux('\\') },
-  { key = 'd', mods = 'CMD|SHIFT', action = tmux("'") },
+  -- Cmd+F : plein écran
+  { key = 'f', mods = 'CMD', action = wezterm.action.ToggleFullScreen },
+  -- Cmd+Alt+F : zoom/dézoom pane natif
+  { key = 'f', mods = 'CMD|ALT', action = wezterm.action.TogglePaneZoomState },
+  -- Cmd+D : split horizontal (gauche|droite) / Cmd+Shift+D : split vertical (haut/bas)
+  { key = 'd', mods = 'CMD', action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' } },
+  { key = 'd', mods = 'CMD|SHIFT', action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' } },
   -- Cmd+N : nouvelle session tmux
   { key = 'n', mods = 'CMD', action = wezterm.action.SendString('\x1b[927~') },
   -- Cmd+Shift+N : nouvelle fenêtre WezTerm (nouvelle session tmux)
@@ -333,6 +330,59 @@ wezterm.on('open-uri', function(window, pane, uri)
     wezterm.run_child_process({ 'open', uri })
     return false
   end
+end)
+
+-- libra — chemins, path:line, sha et dossiers cliquables (Cmd+click).
+-- Le module AJOUTE ses règles aux hyperlink_rules ci-dessus, il ne les écrase
+-- pas : la règle obsidian:// survit. Son handler open-uri s'enregistre après
+-- celui-ci, qui ne retourne false que sur obsidian — les deux cohabitent.
+-- Source : ~/Projects/libra/emitters/wezterm/libra.lua
+package.path = os.getenv('HOME') .. '/Projects/libra/emitters/wezterm/?.lua;' .. package.path
+require('libra').apply_to_config(config)
+
+-- Claude Code pushes its own version as the OSC title ("2.1.220"), which is
+-- useless when juggling projects. Build our own: path · process · claude.
+local function basename(p)
+  return p:match('([^/]+)$') or p
+end
+
+-- Absolute path, ~-shortened. Returns nil when wezterm has no OSC 7 cwd.
+local function pane_path(pane)
+  local cwd = pane.current_working_dir
+  if not cwd then return nil end
+
+  local raw = type(cwd) == 'userdata' and cwd.file_path or tostring(cwd)
+  raw = raw:gsub('^file://[^/]*', ''):gsub('(.)/$', '%1')
+
+  local home = os.getenv('HOME')
+  if home and home ~= '' and raw:sub(1, #home) == home then
+    return '~' .. raw:sub(#home + 1)
+  end
+  return raw
+end
+
+wezterm.on('format-window-title', function(tab)
+  local pane = tab.active_pane
+  local parts = {}
+
+  local path = pane_path(pane)
+  if path then table.insert(parts, path) end
+
+  -- Inside tmux this reports tmux itself, not the command running in the pane
+  local proc = pane.foreground_process_name
+  if proc and proc ~= '' then table.insert(parts, basename(proc)) end
+
+  -- Claude Code announces itself through the OSC title; surface it as a badge
+  local osc = pane.title or ''
+  local version = osc:match('^(%d+%.%d+%.%d+)$')
+  if version then
+    table.insert(parts, 'claude ' .. version)
+  elseif osc ~= '' and osc:lower():find('claude', 1, true) then
+    table.insert(parts, 'claude')
+  end
+
+  if #parts == 0 then return 'wezterm' end
+  return table.concat(parts, '  ·  ')
 end)
 
 return config
