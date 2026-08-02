@@ -10,7 +10,7 @@ return {
       custom_highlights = function(colors)
         return {
           CursorLine = { bg = "NONE", bold = true },
-          -- Line numbers: inactive=brightblack, active=cyan (matches design system)
+          -- Line numbers: inactive=brightblack, active=cyan
           LineNr = { fg = "#7f849c" },
           CursorLineNr = { fg = "#89dceb", bold = true },
           -- Transparent statusline

@@ -12,27 +12,7 @@ local function find_bin(name, fallback)
   return fallback
 end
 
-local tmux_bin = find_bin('tmux', '/opt/homebrew/bin/tmux')
 local notifier_bin = find_bin('terminal-notifier', '/opt/homebrew/bin/terminal-notifier')
-
--- Returns true if we're inside a tmux session
-local function in_tmux()
-  local handle = io.popen(tmux_bin .. ' info 2>/dev/null')
-  if not handle then return false end
-  local result = handle:read('*l')
-  handle:close()
-  return result ~= nil
-end
-
--- Send tmux prefix (Ctrl+Space) + key
-local function tmux(key)
-  return wezterm.action.SendString("\x00" .. key)
-end
-
--- Refresh tmux status bar
-local function tmux_refresh()
-  io.popen(tmux_bin .. ' refresh-client -S')
-end
 
 -- Cycle de thèmes
 local fonts = {
@@ -144,6 +124,13 @@ config.default_cwd = wezterm.home_dir
 config.font = wezterm.font_with_fallback {
   { family = 'JetBrainsMono Nerd Font', weight = 'Regular' },
   'Symbols Nerd Font Mono',
+  -- Le fallback système s'arrête sur Apple SD Gothic Neo (coréenne) : elle a
+  -- 中/文 mais pas les formes simplifiées 简/体, d'où les .notdef. Hiragino
+  -- Sans GB couvre le chinois simplifié, Hiragino Sans le japonais.
+  -- (PingFang n'est pas utilisable : PingFangUI.ttc est réservée à l'UI et
+  -- n'apparaît pas dans `wezterm ls-fonts --list-system`.)
+  'Hiragino Sans GB',
+  'Hiragino Sans',
   'Apple Color Emoji',
 }
 config.font_size = 14
@@ -168,28 +155,17 @@ config.send_composed_key_when_left_alt_is_pressed = true
 -- Désactive tous les keybindings par défaut de WezTerm
 config.disable_default_key_bindings = true
 
--- Keybindings tmux-aware
 config.keys = {
-  -- Cmd+T : nouvelle window tmux (direct, sans condition)
-  { key = 't', mods = 'CMD', action = tmux('c') },
+  -- Cmd+T : nouvel onglet WezTerm natif
+  { key = 't', mods = 'CMD', action = wezterm.action.SpawnTab 'CurrentPaneDomain' },
   -- Cmd+W : ferme le pane WezTerm natif (sans confirmation)
   { key = 'w', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
-  -- Raccourcis onglets AZERTY (naviguent entre windows tmux)
-  { key = '&', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    window:perform_action(tmux('1'), pane)
-  end)},
-  { key = 'é', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    window:perform_action(tmux('2'), pane)
-  end)},
-  { key = '"', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    window:perform_action(tmux('3'), pane)
-  end)},
-  { key = "'", mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    window:perform_action(tmux('4'), pane)
-  end)},
-  { key = '(', mods = 'CMD', action = wezterm.action_callback(function(window, pane)
-    window:perform_action(tmux('5'), pane)
-  end)},
+  -- Cmd+1..5 : onglets natifs (AZERTY)
+  { key = '&', mods = 'CMD', action = wezterm.action.ActivateTab(0) },
+  { key = 'é', mods = 'CMD', action = wezterm.action.ActivateTab(1) },
+  { key = '"', mods = 'CMD', action = wezterm.action.ActivateTab(2) },
+  { key = "'", mods = 'CMD', action = wezterm.action.ActivateTab(3) },
+  { key = '(', mods = 'CMD', action = wezterm.action.ActivateTab(4) },
   -- Cmd+Shift+R : recharge la config. `disable_default_key_bindings = true`
   -- retire le binding par défaut, donc il n'existait plus du tout.
   { key = 'r', mods = 'CMD|SHIFT', action = wezterm.action.ReloadConfiguration },
@@ -230,8 +206,7 @@ config.keys = {
   { key = 'RightArrow', mods = 'CMD|ALT', action = wezterm.action.ActivatePaneDirection 'Right' },
   { key = 'UpArrow',    mods = 'CMD|ALT', action = wezterm.action.ActivatePaneDirection 'Up' },
   { key = 'DownArrow',  mods = 'CMD|ALT', action = wezterm.action.ActivatePaneDirection 'Down' },
-  -- Cmd+R : renommer la session tmux
-  { key = 'r', mods = 'CMD', action = tmux('S') },
+  -- Cmd+R : recharger la config (binding natif, cf. Cmd+Shift+R ci-dessous)
   -- Cmd+F : plein écran
   { key = 'f', mods = 'CMD', action = wezterm.action.ToggleFullScreen },
   -- Cmd+Alt+F : zoom/dézoom pane natif
@@ -239,28 +214,17 @@ config.keys = {
   -- Cmd+D : split horizontal (gauche|droite) / Cmd+Shift+D : split vertical (haut/bas)
   { key = 'd', mods = 'CMD', action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' } },
   { key = 'd', mods = 'CMD|SHIFT', action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' } },
-  -- Cmd+N : nouvelle session tmux
-  { key = 'n', mods = 'CMD', action = wezterm.action.SendString('\x1b[927~') },
-  -- Cmd+Shift+N : nouvelle fenêtre WezTerm (nouvelle session tmux)
+  -- Cmd+N : nouvelle fenêtre WezTerm
+  { key = 'n', mods = 'CMD', action = wezterm.action.SpawnWindow },
+  -- Cmd+Shift+N : nouvelle fenêtre WezTerm
   { key = 'n', mods = 'CMD|SHIFT', action = wezterm.action.SpawnWindow },
-  -- Cmd+Shift+X : supprimer si yazi
-  { key = 'x', mods = 'CMD|SHIFT', action = tmux('X') },
-  -- Cmd+Shift+R : renommer si yazi
-  { key = 'r', mods = 'CMD|SHIFT', action = tmux('B') },
-  -- Cmd+Shift+E : edit si yazi
-  { key = 'e', mods = 'CMD|SHIFT', action = tmux('O') },
-  -- Cmd+Up/Down : naviguer entre sessions tmux
-  { key = 'UpArrow', mods = 'CMD', action = tmux('(') },
-  { key = 'DownArrow', mods = 'CMD', action = tmux(')') },
-  -- Cmd+Left/Right : naviguer entre windows tmux
-  { key = 'LeftArrow', mods = 'CMD', action = wezterm.action.SendString('\x1b[902~') },
-  { key = 'RightArrow', mods = 'CMD', action = wezterm.action.SendString('\x1b[903~') },
-  -- Cmd+Shift+Left/Right : swap windows
-  { key = 'LeftArrow', mods = 'CMD|SHIFT', action = tmux('{') },
-  { key = 'RightArrow', mods = 'CMD|SHIFT', action = tmux('}') },
-  -- Cmd+Shift+Up/Down : move window to prev/next session
-  { key = 'UpArrow', mods = 'CMD|SHIFT', action = tmux('B') },
-  { key = 'DownArrow', mods = 'CMD|SHIFT', action = tmux('F') },
+  -- Cmd+Shift+R : recharger la config
+  -- Cmd+Left/Right : naviguer entre onglets
+  { key = 'LeftArrow', mods = 'CMD', action = wezterm.action.ActivateTabRelative(-1) },
+  { key = 'RightArrow', mods = 'CMD', action = wezterm.action.ActivateTabRelative(1) },
+  -- Cmd+Shift+Left/Right : déplacer l'onglet
+  { key = 'LeftArrow', mods = 'CMD|SHIFT', action = wezterm.action.MoveTabRelative(-1) },
+  { key = 'RightArrow', mods = 'CMD|SHIFT', action = wezterm.action.MoveTabRelative(1) },
   -- Cmd+Shift+L / Cmd+Shift+K : cycle thèmes
   { key = 'l', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window) cycle_theme(window, 1) end) },
   { key = 'k', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window) cycle_theme(window, -1) end) },
@@ -272,7 +236,7 @@ config.keys = {
   { key = 'j', mods = 'CMD|SHIFT', action = wezterm.action_callback(function(window) cycle_opacity(window, -0.05) end) },
   -- Ctrl+Shift+L : debug overlay (logs)
   { key = 'l', mods = 'CTRL|SHIFT', action = wezterm.action.ShowDebugOverlay },
-  -- Cmd+Q : ferme WezTerm sans toucher aux sessions tmux
+  -- Cmd+Q : ferme WezTerm
   { key = 'q', mods = 'CMD', action = wezterm.action.QuitApplication },
   -- Cmd++ / Cmd+- / Cmd+0 : zoom
   { key = '+', mods = 'CMD', action = wezterm.action.IncreaseFontSize },
@@ -281,11 +245,7 @@ config.keys = {
   -- Cmd+F : natif macOS (pas de binding WezTerm)
   -- Shift+Enter
   { key = 'Enter', mods = 'SHIFT', action = wezterm.action.SendString('\x1b[13;2u') },
-  -- Cmd+E : toggle yazi sidebar
-  { key = 'e', mods = 'CMD', action = tmux('E') },
-  -- Cmd+M : speech-to-text toggle (record / stop+transcribe)
-  { key = 'm', mods = 'CMD', action = tmux('m') },
-  -- Cmd → Meta pour Neovim (via tmux kitty-keys)
+  -- Cmd → Meta pour Neovim
   { key = 's', mods = 'CMD', action = wezterm.action.SendString('\x1bs') },
   { key = 'z', mods = 'CMD', action = wezterm.action.SendString('\x1bz') },
   { key = 'z', mods = 'CMD|SHIFT', action = wezterm.action.SendString('\x1bZ') },
@@ -294,10 +254,9 @@ config.keys = {
   { key = ':', mods = 'CMD', action = wezterm.action.SendString('\x1b:') },
   -- Cmd+P : find files (Neovim) / fzf (shell)
   { key = 'p', mods = 'CMD', action = wezterm.action.SendString('\x1bp') },
-  -- Cmd+Shift+P : theme cycling tmux
-  { key = 'p', mods = 'CMD|SHIFT', action = tmux('G') },
-  -- Cmd+Shift+T : new window in yazi dir
-  { key = 't', mods = 'CMD|SHIFT', action = tmux('T') },
+  -- Cmd+Shift+P : rien (theme cycling déjà sur Cmd+Shift+L/K)
+  -- Cmd+Shift+T : nouvel onglet
+  { key = 't', mods = 'CMD|SHIFT', action = wezterm.action.SpawnTab 'CurrentPaneDomain' },
   -- Fix Option+Arrow (CSI sequences)
   { key = 'LeftArrow', mods = 'ALT', action = wezterm.action.SendString('\x1b[1;3D') },
   { key = 'RightArrow', mods = 'ALT', action = wezterm.action.SendString('\x1b[1;3C') },
@@ -373,7 +332,7 @@ wezterm.on('format-window-title', function(tab)
   local path = pane_path(pane)
   if path then table.insert(parts, path) end
 
-  -- Inside tmux this reports tmux itself, not the command running in the pane
+  -- Reports the command running in the pane
   local proc = pane.foreground_process_name
   if proc and proc ~= '' then table.insert(parts, basename(proc)) end
 
@@ -388,19 +347,6 @@ wezterm.on('format-window-title', function(tab)
 
   if #parts == 0 then return 'wezterm' end
   return table.concat(parts, '  ·  ')
-end)
-
--- PROBE TEMPORAIRE — à retirer
-wezterm.on('window-config-reloaded', function(window, pane)
-  local ok, err = pcall(function()
-    local f = io.open('/private/tmp/claude-501/-Users-matthieuczeski-Projects/a0f40342-a9a0-445d-b789-2042f1cb66ba/scratchpad/wz-probe.json', 'w')
-    f:write(wezterm.json_encode({
-      screens = wezterm.gui.screens(),
-      dims = window:get_dimensions(),
-    }))
-    f:close()
-  end)
-  if not ok then wezterm.log_error('probe: ' .. tostring(err)) end
 end)
 
 return config

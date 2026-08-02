@@ -11,7 +11,6 @@ brew install fd ripgrep 2>/dev/null || true
 brew install pngpaste 2>/dev/null || true
 brew install terminal-notifier 2>/dev/null || true
 brew install whisper-cpp sox 2>/dev/null || true
-brew install tmux 2>/dev/null || true
 pip3 install pyobjc-framework-Quartz 2>/dev/null || true
 echo "✓ Dependencies"
 
@@ -67,13 +66,6 @@ mkdir -p "$HOME/.config/ghostty"
 ln -sf "$DOTFILES/.config/ghostty/config" "$HOME/.config/ghostty/config"
 echo "✓ Ghostty"
 
-# Yazi
-mkdir -p "$HOME/.config/yazi"
-for f in "$DOTFILES/.config/yazi"/*; do
-  [ -f "$f" ] && ln -sf "$f" "$HOME/.config/yazi/$(basename "$f")"
-done
-echo "✓ Yazi"
-
 # Neovim
 brew install neovim 2>/dev/null || true
 if [ ! -f "$HOME/.config/nvim/init.lua" ]; then
@@ -89,24 +81,10 @@ for f in "$DOTFILES/.config/nvim/lua/plugins"/*.lua; do
 done
 echo "✓ Neovim"
 
-ln -sf "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
-echo "✓ tmux config"
-
 # Claude Code statusline (global, all projects)
 mkdir -p "$HOME/.claude"
 ln -sf "$DOTFILES/.claude/statusline.py" "$HOME/.claude/statusline.py"
 echo "✓ Claude statusline"
-
-# TPM (tmux plugin manager)
-if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm" 2>/dev/null
-  echo "✓ TPM installed"
-else
-  echo "✓ TPM already installed"
-fi
-# Install tmux plugins
-"$HOME/.tmux/plugins/tpm/bin/install_plugins" 2>/dev/null || true
-echo "✓ tmux plugins"
 
 # Config
 mkdir -p "$HOME/.local/etc"
@@ -170,7 +148,7 @@ else
 fi
 echo "✓ Claude Code notifications"
 
-# Claude Code — agent teams tmux mode
+# Claude Code — agent teams
 python3 -c "
 import json
 path = '$HOME/.claude/settings.json'
@@ -198,4 +176,4 @@ else:
     print('✓ Claude statusLine already wired')
 " 2>/dev/null || echo "⚠ ~/.claude/settings.json not found, skipping statusLine"
 
-echo "Done. Restart Ghostty/WezTerm and run: tmux kill-server"
+echo "Done. Restart Ghostty/WezTerm."

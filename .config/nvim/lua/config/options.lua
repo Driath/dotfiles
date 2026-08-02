@@ -24,7 +24,7 @@ vim.api.nvim_create_autocmd({ "BufWinEnter", "BufEnter", "WinEnter" }, {
   end,
 })
 
--- Send title to terminal (visible in tmux pane title)
+-- Send title to terminal (visible in pane title)
 vim.opt.title = true
 vim.opt.titlestring = "%t"  -- just the filename
 

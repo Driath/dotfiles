@@ -1,39 +1,30 @@
-# Keybindings WezTerm + tmux
-
-## WezTerm (CMD)
+# Keybindings WezTerm (CMD)
 
 | Raccourci       | Action                        |
 |-----------------|-------------------------------|
-| `CMD+N`         | Nouvelle session tmux (TODO: forcer le focus WezTerm sur la nouvelle session) |
-| `CMD+Up`        | Session tmux précédente       |
-| `CMD+Down`      | Session tmux suivante         |
-| `CMD+D`         | Split horizontal (tmux)       |
-| `CMD+Shift+D`   | Split vertical (tmux)         |
-| `CMD+T`         | Nouvelle window tmux          |
-| `CMD+W`         | Ferme la pane tmux            |
-| `CMD+Left`      | Window tmux précédente        |
-| `CMD+Right`     | Window tmux suivante          |
-| `CMD+&`         | Window tmux 1                 |
-| `CMD+é`         | Window tmux 2                 |
-| `CMD+"`         | Window tmux 3                 |
-| `CMD+'`         | Window tmux 4                 |
-| `CMD+(`         | Window tmux 5                 |
+| `CMD+T`         | Nouvel onglet                 |
+| `CMD+N`         | Nouvelle fenêtre              |
+| `CMD+W`         | Ferme le pane                 |
+| `CMD+D`         | Split horizontal              |
+| `CMD+Shift+D`   | Split vertical                |
+| `CMD+Left`      | Onglet précédent              |
+| `CMD+Right`     | Onglet suivant                |
+| `CMD+Shift+Left`| Déplace l'onglet à gauche     |
+| `CMD+Shift+Right`| Déplace l'onglet à droite    |
+| `CMD+&`         | Onglet 1 (AZERTY)             |
+| `CMD+é`         | Onglet 2 (AZERTY)             |
+| `CMD+"`         | Onglet 3 (AZERTY)             |
+| `CMD+'`         | Onglet 4 (AZERTY)             |
+| `CMD+(`         | Onglet 5 (AZERTY)             |
+| `CMD+Alt+←→↑↓`  | Naviguer entre panes          |
+| `CMD+Alt+Shift+←→↑↓` | Redimensionner les panes |
+| `CMD+Alt+F`     | Zoom pane (toggle)            |
 | `CMD+,`         | Ouvre wezterm.lua             |
+| `CMD+Shift+R`   | Recharge la config            |
 | `CMD+C`         | Copier (si sélection) / SIGINT|
 | `CMD+V`         | Coller                        |
-| `CMD+Enter`     | Toggle fullscreen             |
+| `CMD+F`         | Fullscreen                    |
+| `CMD+Shift+L/K` | Cycle thèmes                  |
+| `CMD+Shift+I/O` | Cycle fonts                   |
+| `CMD+Shift+U/J` | Cycle opacité                 |
 | `SHIFT+Enter`   | Shift+Enter (escape code)     |
-
-## tmux (Prefix = Ctrl+Space)
-
-| Raccourci         | Action                        |
-|-------------------|-------------------------------|
-| `Prefix+h/j/k/l`  | Naviguer entre panes          |
-| `Prefix+H/L`      | Window précédente/suivante    |
-| `Prefix+J/K`      | Session suivante/précédente   |
-| `Prefix+'`        | Split vertical                |
-| `Prefix+\`        | Split horizontal              |
-| `Prefix+x`        | Kill pane (sans confirmation) |
-| `Prefix+&`        | Kill window (sans confirmation)|
-| `Prefix+v`        | Début sélection (copy mode)   |
-| `Prefix+y`        | Copier dans clipboard (pbcopy)|

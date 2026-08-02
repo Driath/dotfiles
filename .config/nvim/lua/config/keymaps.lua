@@ -1,8 +1,8 @@
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 --
--- Philosophy: Option (left) = app shortcuts, Cmd = tmux/system
--- Kitty keyboard protocol transmits Option+key natively through tmux
+-- Philosophy: Option (left) = app shortcuts, Cmd = system
+-- Kitty keyboard protocol transmits Option+key natively
 
 -- ==========================================================================
 -- Navigation layers: Arrow / Shift+Arrow / Option+Arrow / Option+Shift+Arrow
@@ -59,7 +59,7 @@ vim.keymap.set("i", "<M-S-Down>", "<Esc>V]f", { remap = true, desc = "Select to 
 -- Editor actions: Option+key (replaces Cmd+key hacks)
 -- ==========================================================================
 
--- Option+S → save (Cmd+S routed here via tmux)
+-- Option+S → save (Cmd+S routed here)
 vim.keymap.set({ "n", "i", "v" }, "<M-s>", "<Cmd>w<CR>", { desc = "Save" })
 
 -- Option+Z → undo, Option+Shift+Z → redo

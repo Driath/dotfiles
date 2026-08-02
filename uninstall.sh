@@ -11,10 +11,6 @@ echo "✓ Starship"
 rm -f "$HOME/.config/wezterm/wezterm.lua"
 echo "✓ WezTerm"
 
-# tmux
-rm -f "$HOME/.tmux.conf"
-echo "✓ tmux"
-
 # Screenshot tool
 rm -f "$HOME/.local/bin/screenshot.sh"
 echo "✓ Screenshot tool"
