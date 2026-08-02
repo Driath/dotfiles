@@ -15,17 +15,18 @@ font-family = Iosevka Nerd Font
 font-family = Maple Mono NF
 font-size = 14
 adjust-cell-height = 5%
-background-opacity = 0.85
+background-opacity = 1
 background-opacity-cells = true
+cursor-style-blink = false
 background-blur = 0
 window-padding-x = 0
 window-padding-y = 0
-window-decoration = auto
+window-decoration = true
 confirm-close-surface = false
-macos-titlebar-style = hidden
 
-# Toujours demarrer dans tmux (prefer compiled version, fallback to brew)
-command = /bin/zsh -c 'TMUX_BIN="${HOME}/.local/bin/tmux"; [ -x "$TMUX_BIN" ] || TMUX_BIN="$(command -v tmux)"; "$TMUX_BIN" new-session'
+# Shell direct, sans tmux, toujours dans ~/
+working-directory = home
+command = /bin/zsh -l
 
 # Option gauche = Alt (pour raccourcis app), Option droit = caractères spéciaux
 macos-option-as-alt = left
@@ -36,105 +37,32 @@ keybind = alt+down=csi:1;3B
 
 
 # ===========================================================================
-# Cmd → Option (Meta) pour les actions éditeur
+# Cmd → clipboard natif macOS
 # ===========================================================================
-keybind = cmd+s=text:\x1bs
-keybind = cmd+z=text:\x1bz
-keybind = cmd+shift+z=text:\x1bZ
-keybind = cmd+a=text:\x1ba
-keybind = cmd+x=text:\x1bx
-keybind = cmd+c=text:\x1bc
-keybind = cmd+v=text:\x00V
-keybind = cmd+:=text:\x1b:
+keybind = cmd+c=copy_to_clipboard
+keybind = cmd+v=paste_from_clipboard
 
 # ===========================================================================
-# Cmd → bawi (via CSI user-keys interceptés par tmux root table)
-# Séquences \x1b[900~ à \x1b[930~ → tmux user-keys → run-shell "bawi ..."
+# Windows / tabs / splits — natif Ghostty (tmux retiré)
 # ===========================================================================
+keybind = cmd+t=new_tab
+keybind = cmd+w=close_surface
+keybind = cmd+n=new_window
+keybind = cmd+shift+n=new_window
+keybind = cmd+d=new_split:right
+keybind = cmd+shift+d=new_split:down
 
-# Navigation windows
-keybind = cmd+t=text:\x1b[900~
-keybind = cmd+w=text:\x1b[901~
-keybind = cmd+left=text:\x1b[902~
-keybind = cmd+right=text:\x1b[903~
-keybind = cmd+up=text:\x1b[904~
-keybind = cmd+down=text:\x1b[905~
-
-# Onglets AZERTY
-keybind = cmd+physical:one=text:\x1b[906~
-keybind = cmd+physical:two=text:\x1b[907~
-keybind = cmd+physical:three=text:\x1b[908~
-keybind = cmd+physical:four=text:\x1b[909~
-keybind = cmd+physical:five=text:\x1b[910~
-
-# Splits
-keybind = cmd+d=text:\x1b[911~
-keybind = cmd+shift+d=text:\x1b[912~
-
-# Navigation panes
-keybind = cmd+alt+left=text:\x1b[913~
-keybind = cmd+alt+right=text:\x1b[914~
-keybind = cmd+alt+up=text:\x1b[915~
-keybind = cmd+alt+down=text:\x1b[916~
-
-# Swap windows
-keybind = cmd+shift+left=text:\x1b[917~
-keybind = cmd+shift+right=text:\x1b[918~
-
-# Move window to another session
-keybind = cmd+shift+up=text:\x1b[919~
-keybind = cmd+shift+down=text:\x1b[920~
-
-# Swap panes
-keybind = cmd+alt+shift+left=text:\x1b[921~
-keybind = cmd+alt+shift+right=text:\x1b[922~
-keybind = cmd+alt+shift+up=text:\x1b[923~
-keybind = cmd+alt+shift+down=text:\x1b[924~
-
-# Zoom pane
-keybind = cmd+alt+f=text:\x1b[925~
-
-# Rename session
-keybind = cmd+r=text:\x1b[926~
-
-# Session create
-keybind = cmd+n=text:\x1b[927~
-
-# Fullscreen (natif macOS)
+# Fullscreen natif macOS
 keybind = cmd+f=unbind
 
 # Font size
 keybind = cmd+equal=increase_font_size:1
+keybind = cmd+plus=increase_font_size:1
 keybind = cmd+minus=decrease_font_size:1
 keybind = cmd+zero=reset_font_size
 
-# Quit
-keybind = cmd+q=quit
-# Cmd+E → neo-tree (Neovim)
-keybind = cmd+e=text:\x1be
-# Cmd+M → speech-to-text
-keybind = cmd+m=text:\x00m
-# Cmd+Shift+N → libre
-keybind = cmd+shift+n=new_window
-# Cmd+Shift+X → libre
-keybind = cmd+shift+x=unbind
-# Cmd+Shift+R → libre
-keybind = cmd+shift+r=unbind
-# Cmd+Shift+E → libre
-keybind = cmd+shift+e=unbind
-# Cmd+Shift+T → new window in yazi dir
-keybind = cmd+shift+t=text:\x00T
-# Cmd+P → find files (Neovim) / fzf (shell)
-keybind = cmd+p=text:\x1bp
-# Theme cycling
-keybind = cmd+shift+l=text:\x00G
-keybind = cmd+shift+k=text:\x00Y
-# Font cycling
-keybind = cmd+shift+i=text:\x1b[928~
-keybind = cmd+shift+o=text:\x1b[929~
-# Opacity
-keybind = cmd+shift+u=text:\x1b[930~
-keybind = cmd+shift+j=text:\x1b[931~
+# Quit coupé : cmd+q agit comme cmd+w (ferme une surface à la fois, jamais tout d'un coup)
+keybind = cmd+q=close_surface
 # Open config (Cmd+, like any macOS app)
 keybind = cmd+comma=open_config
 # Reload config
