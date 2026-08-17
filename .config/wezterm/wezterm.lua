@@ -138,7 +138,50 @@ config.line_height = 1.05
 config.front_end = 'WebGpu'
 config.enable_kitty_graphics = true
 config.window_padding = { left = '1cell', right = '1cell', top = '0.5cell', bottom = '0.5cell' }
-config.enable_tab_bar = false
+config.enable_tab_bar = true
+config.use_fancy_tab_bar = true
+config.hide_tab_bar_if_only_one_tab = true
+config.tab_bar_at_bottom = true
+-- Le bouton + ferme la boucle du minimalisme : pas de bouton, pas de liseré
+-- à styliser à côté. Cmd+T (déjà bindé) ouvre un onglet.
+config.show_new_tab_button_in_tab_bar = false
+-- window_frame gère la vraie transparence (blend correct avec le bureau,
+-- comme le pane). Les bg_color par onglet (ci-dessous) créaient une couche
+-- composée par-dessus qui ne blendait pas pareil → pastille visiblement
+-- opaque même à 0.7. Donc alpha ici, et aucun bg_color sur les onglets.
+config.window_frame = {
+  -- Base fine, l'onglet actif ressort via Attribute.Intensity='Bold' dans
+  -- format-tab-title (synthétisé par-dessus si la famille n'a pas de vrai
+  -- style Bold distinct).
+  font = wezterm.font { family = 'JetBrainsMono Nerd Font', weight = 'Light' },
+  active_titlebar_bg = 'rgba(17, 17, 27, 0.7)',
+  inactive_titlebar_bg = 'rgba(17, 17, 27, 0.7)',
+}
+-- bg_color est un champ obligatoire du schéma (WezTerm refuse de l'omettre),
+-- mais alpha 0 = couche invisible : l'onglet repose sur le fond (déjà
+-- transparent) du window_frame ci-dessus, sans jamais assombrir en le
+-- superposant. Seule l'épaisseur de la police distingue l'onglet actif
+-- (Bold) du reste (Normal).
+config.colors = {
+  background = '#11111b',
+  tab_bar = {
+    -- window_frame ne couvre que la zone titlebar en haut ; en bas
+    -- (tab_bar_at_bottom) la barre retombe sur ce champ. Alpha safe ici vu
+    -- que active_tab/inactive_tab sont eux-mêmes à alpha 0 (pas de cumul).
+    background = 'rgba(17, 17, 27, 0.7)',
+    -- fg_color est ici pour satisfaire le schéma (champ obligatoire comme
+    -- bg_color) mais sans effet réel : format-tab-title ci-dessous fixe sa
+    -- propre couleur par segment (path/branche/titre) et l'emporte toujours.
+    active_tab = { bg_color = 'rgba(17, 17, 27, 0)', fg_color = '#ffffff' },
+    inactive_tab = { bg_color = 'rgba(17, 17, 27, 0)', fg_color = '#a0a0a0' },
+    inactive_tab_hover = { bg_color = 'rgba(17, 17, 27, 0)', fg_color = '#ffffff' },
+    -- Tentative : ce champ est documenté "retro tab bar only" par WezTerm,
+    -- peut-être sans effet ici. Si le séparateur entre onglets reste visible
+    -- après reload, c'est un artefact de rendu (seam d'antialiasing sur deux
+    -- quads adjacents à bg_color alpha 0), pas un champ manquant à trouver.
+    inactive_tab_edge = '#11111b',
+  },
+}
 config.window_background_opacity = 0.7
 config.macos_window_background_blur = 0
 config.window_decorations = 'RESIZE'
@@ -267,21 +310,38 @@ config.keys = {
   { key = 'RightArrow', mods = 'CTRL|ALT', action = wezterm.action.SendString('\x1b[1;7C') },
 }
 
--- Cmd+click pour ouvrir les liens (hyperlinks)
+-- Option+click pour ouvrir les liens (hyperlinks) — geste unique, aligné sur la
+-- philosophie « coup d'œil » (libra). MESURÉ (wezterm show-keys) : les défauts
+-- restent actifs pour tout combo (event, mods) non redéfini ici — Up sans
+-- modificateur, SHIFT et SHIFT|ALT ouvraient donc ENCORE le lien via
+-- CompleteSelectionOrOpenLinkAtMouseCursor. On les rabat sur CompleteSelection
+-- (la copie au relâchement survit, l'ouverture de lien tombe).
+-- ALT en Or-, pas OpenLink sec : sinon alt+drag (sélection rectangulaire) ne
+-- copie plus rien au relâchement — le Up ALT est le même événement.
 config.mouse_bindings = {
   {
     event = { Up = { streak = 1, button = 'Left' } },
-    mods = 'CMD',
-    action = wezterm.action.OpenLinkAtMouseCursor,
+    mods = 'NONE',
+    action = wezterm.action.CompleteSelection 'ClipboardAndPrimarySelection',
   },
   {
     event = { Up = { streak = 1, button = 'Left' } },
-    mods = 'CTRL',
-    action = wezterm.action.OpenLinkAtMouseCursor,
+    mods = 'SHIFT',
+    action = wezterm.action.CompleteSelection 'ClipboardAndPrimarySelection',
+  },
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'SHIFT|ALT',
+    action = wezterm.action.CompleteSelection 'PrimarySelection',
+  },
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'ALT',
+    action = wezterm.action.CompleteSelectionOrOpenLinkAtMouseCursor 'ClipboardAndPrimarySelection',
   },
 }
 
--- obsidian:// links clickable (Cmd+click)
+-- obsidian:// links clickable (option+click)
 config.hyperlink_rules = wezterm.default_hyperlink_rules()
 table.insert(config.hyperlink_rules, {
   regex = [[obsidian://[^\s"'<>]+]],
@@ -296,7 +356,7 @@ wezterm.on('open-uri', function(window, pane, uri)
   end
 end)
 
--- libra — chemins, path:line, sha et dossiers cliquables (Cmd+click).
+-- libra — chemins, path:line, sha et dossiers cliquables (option+click).
 -- Le module AJOUTE ses règles aux hyperlink_rules ci-dessus, il ne les écrase
 -- pas : la règle obsidian:// survit. Son handler open-uri s'enregistre après
 -- celui-ci, qui ne retourne false que sur obsidian — les deux cohabitent.
@@ -304,19 +364,19 @@ end)
 package.path = os.getenv('HOME') .. '/Projects/libra/emitters/wezterm/?.lua;' .. package.path
 require('libra').apply_to_config(config)
 
--- Claude Code pushes its own version as the OSC title ("2.1.220"), which is
--- useless when juggling projects. Build our own: path · process · claude.
-local function basename(p)
-  return p:match('([^/]+)$') or p
-end
-
--- Absolute path, ~-shortened. Returns nil when wezterm has no OSC 7 cwd.
-local function pane_path(pane)
+-- Absolute cwd, non transformé. Returns nil when wezterm has no OSC 7 cwd.
+local function pane_cwd(pane)
   local cwd = pane.current_working_dir
   if not cwd then return nil end
 
   local raw = type(cwd) == 'userdata' and cwd.file_path or tostring(cwd)
-  raw = raw:gsub('^file://[^/]*', ''):gsub('(.)/$', '%1')
+  return (raw:gsub('^file://[^/]*', ''):gsub('(.)/$', '%1'))
+end
+
+-- Absolute path, ~-shortened.
+local function pane_path(pane)
+  local raw = pane_cwd(pane)
+  if not raw then return nil end
 
   local home = os.getenv('HOME')
   if home and home ~= '' and raw:sub(1, #home) == home then
@@ -325,28 +385,164 @@ local function pane_path(pane)
   return raw
 end
 
-wezterm.on('format-window-title', function(tab)
-  local pane = tab.active_pane
-  local parts = {}
+local function shell_quote(s)
+  return "'" .. s:gsub("'", "'\\''") .. "'"
+end
 
-  local path = pane_path(pane)
-  if path then table.insert(parts, path) end
+-- Un seul `git status` fait tout (branche, ahead/behind, fichiers modifiés) —
+-- mis en cache car format-tab-title tourne trop souvent pour se permettre un
+-- subprocess à chaque appel. git gère lui-même la remontée depuis un
+-- sous-dossier ou un worktree, pas besoin de le refaire à la main.
+local git_cache = {}
+local GIT_CACHE_TTL = 3
 
-  -- Reports the command running in the pane
-  local proc = pane.foreground_process_name
-  if proc and proc ~= '' then table.insert(parts, basename(proc)) end
+local function git_status(dir)
+  if not dir then return nil end
 
-  -- Claude Code announces itself through the OSC title; surface it as a badge
-  local osc = pane.title or ''
-  local version = osc:match('^(%d+%.%d+%.%d+)$')
-  if version then
-    table.insert(parts, 'claude ' .. version)
-  elseif osc ~= '' and osc:lower():find('claude', 1, true) then
-    table.insert(parts, 'claude')
+  local cached = git_cache[dir]
+  local now = os.time()
+  if cached and (now - cached.time) < GIT_CACHE_TTL then
+    return cached.data
   end
 
-  if #parts == 0 then return 'wezterm' end
-  return table.concat(parts, '  ·  ')
+  local handle = io.popen('git -C ' .. shell_quote(dir) .. ' status --porcelain=v2 --branch 2>/dev/null')
+  local output = handle and handle:read('*a')
+  if handle then handle:close() end
+
+  local data = nil
+  if output and output ~= '' then
+    local branch = output:match('# branch%.head (%S+)')
+    local oid = output:match('# branch%.oid (%x+)')
+    local ahead, behind = output:match('# branch%.ab %+(%d+) %-(%d+)')
+    local dirty = 0
+    for line in output:gmatch('[^\n]+') do
+      local tag = line:sub(1, 1)
+      if tag == '1' or tag == '2' or tag == 'u' or tag == '?' then
+        dirty = dirty + 1
+      end
+    end
+    data = {
+      branch = (branch and branch ~= '(detached)') and branch or (oid and oid:sub(1, 7)),
+      dirty = dirty,
+      ahead = tonumber(ahead) or 0,
+      behind = tonumber(behind) or 0,
+    }
+  end
+
+  git_cache[dir] = { time = now, data = data }
+  return data
+end
+
+-- Une couleur par nature de segment (Catppuccin Mocha) : on distingue
+-- path/branche/titre/statut au coup d'œil, indépendamment du focus de l'onglet.
+local SEGMENT_COLORS = {
+  path = '#89dceb',
+  branch = '#cba6f7',
+  title = '#a6e3a1',
+  dirty = '#f9e2af',
+  ahead = '#a6e3a1',
+  behind = '#f38ba8',
+}
+
+-- Un sous-segment par couleur : branche (mauve), *N modifiés (jaune, alerte
+-- douce), ↑N à pousser (vert), ↓N à tirer (rouge) — pas un seul bloc mauve.
+local function git_segments(status)
+  if not status or not status.branch then return {} end
+  local segs = { { text = '\u{f418} ' .. status.branch, color = SEGMENT_COLORS.branch } }
+  if status.dirty > 0 then
+    table.insert(segs, { text = ' *' .. status.dirty, color = SEGMENT_COLORS.dirty })
+  end
+  if status.ahead > 0 then
+    table.insert(segs, { text = ' ↑' .. status.ahead, color = SEGMENT_COLORS.ahead })
+  end
+  if status.behind > 0 then
+    table.insert(segs, { text = ' ↓' .. status.behind, color = SEGMENT_COLORS.behind })
+  end
+  return segs
+end
+
+-- Style fish/starship : chaque segment sauf le dernier réduit à 1 char (2
+-- pour un dossier caché, point compris). "~/Projects/czeski.fr" -> "~/P/czeski.fr".
+local function shorten_path(path)
+  local leading_slash = path:sub(1, 1) == '/' and '/' or ''
+  local segments = {}
+  for seg in path:gmatch('[^/]+') do
+    table.insert(segments, seg)
+  end
+  for i = 1, #segments - 1 do
+    local seg = segments[i]
+    segments[i] = seg:sub(1, 1) == '.' and seg:sub(1, 2) or seg:sub(1, 1)
+  end
+  return leading_slash .. table.concat(segments, '/')
+end
+
+-- path (brut ou raccourci selon path_transform) · branche git (+ sous-segments
+-- statut) · titre du pane. Chaque élément de la liste retournée est un GROUPE
+-- (liste de {text, color}) : ' · ' ne sépare qu'entre groupes, jamais entre
+-- les sous-segments d'un même groupe (branche/*N/↑N/↓N restent collés).
+-- pane.title est déjà le meilleur signal dispo (OSC 2 mis à jour par le
+-- process qui tourne dedans — Claude Code y pousse son titre de tâche/
+-- branche, sinon WezTerm y met le nom du process par défaut) : pas besoin de
+-- le reparser. Partagé par format-tab-title et format-window-title.
+local function pane_title_parts(pane, path_transform)
+  local groups = {}
+
+  local path = pane_path(pane)
+  if path then
+    -- nf-fa-folder
+    local text = '\u{f07b} ' .. (path_transform and path_transform(path) or path)
+    table.insert(groups, { { text = text, color = SEGMENT_COLORS.path } })
+  end
+
+  local git_group = git_segments(git_status(pane_cwd(pane)))
+  if #git_group > 0 then table.insert(groups, git_group) end
+
+  if pane.title and pane.title ~= '' then
+    -- nf-oct-terminal
+    table.insert(groups, { { text = '\u{f489} ' .. pane.title, color = SEGMENT_COLORS.title } })
+  end
+
+  return groups
+end
+
+wezterm.on('format-tab-title', function(tab)
+  local groups = pane_title_parts(tab.active_pane, shorten_path)
+  -- Séparateurs discrets, jamais dans les couleurs des segments : ils ne
+  -- doivent pas concurrencer path/branche/titre pour l'attention.
+  local sep_color = tab.is_active and '#9399b2' or '#585b70'
+
+  local items = { { Attribute = { Intensity = tab.is_active and 'Bold' or 'Normal' } } }
+  local function push(color, text)
+    table.insert(items, { Foreground = { Color = color } })
+    table.insert(items, { Text = text })
+  end
+
+  -- Le numéro matche les bindings Cmd+1..5 (ActivateTab(0..4) sur AZERTY).
+  push(sep_color, ' ' .. (tab.tab_index + 1) .. ' · ')
+
+  if #groups == 0 then
+    push('#ffffff', 'wezterm')
+  else
+    for gi, group in ipairs(groups) do
+      if gi > 1 then push(sep_color, ' · ') end
+      for _, part in ipairs(group) do push(part.color, part.text) end
+    end
+  end
+
+  table.insert(items, { Text = ' ' })
+  return items
+end)
+
+wezterm.on('format-window-title', function(tab)
+  local groups = pane_title_parts(tab.active_pane, nil)
+  if #groups == 0 then return 'wezterm' end
+  local group_texts = {}
+  for _, group in ipairs(groups) do
+    local buf = {}
+    for _, part in ipairs(group) do table.insert(buf, part.text) end
+    table.insert(group_texts, table.concat(buf))
+  end
+  return table.concat(group_texts, '  ·  ')
 end)
 
 return config
