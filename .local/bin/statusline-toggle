@@ -1,0 +1,15 @@
+#!/bin/sh
+# Toggle ~/.claude statusline between icon (default) and text rendering.
+# Read by statusline.py's get_style() on every render.
+
+STYLE_FILE="$HOME/.claude/statusline-style"
+current=$(cat "$STYLE_FILE" 2>/dev/null || echo icons)
+
+if [ "$current" = "text" ]; then
+  next=icons
+else
+  next=text
+fi
+
+printf '%s' "$next" > "$STYLE_FILE"
+echo "statusline style: $next"
