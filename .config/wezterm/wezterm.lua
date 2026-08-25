@@ -139,11 +139,15 @@ config.front_end = 'WebGpu'
 config.enable_kitty_graphics = true
 config.window_padding = { left = '1cell', right = '1cell', top = '0.5cell', bottom = '0.5cell' }
 config.enable_tab_bar = true
--- La fancy tab bar colle un bouton ✕ sur chaque onglet, que rien ne
--- configure : même avec un libellé vide (cf. format-tab-title), le ✕ reste à
--- côté des trois boutons. Seule la retro (false) s'en débarrasse, mais son
--- rendu en cellules terminal est moins bon. On garde fancy, on garde le ✕.
+-- La fancy tab bar colle un bouton ✕ sur chaque onglet, et
+-- show_close_tab_button_in_tabs n'existe pas dans cette version (20240203) :
+-- un libellé vide (cf. format-tab-title) laisse quand même le ✕ à côté des
+-- trois boutons. Le seul levier est show_tabs_in_tab_bar : il retire les
+-- onglets eux-mêmes, donc le ✕ avec, sans toucher à la barre ni aux boutons
+-- intégrés. On le pilote au nombre d'onglets (cf. update-status plus bas) :
+-- false à un seul onglet, true dès le deuxième.
 config.use_fancy_tab_bar = true
+config.show_tabs_in_tab_bar = false
 -- Les deux false sont imposés par INTEGRATED_BUTTONS (cf. window_decorations
 -- plus bas) : les boutons natifs sont dessinés DANS la barre d'onglets. Si
 -- elle se cache à un seul onglet, les boutons partent avec ; si elle est en
@@ -157,19 +161,43 @@ config.show_new_tab_button_in_tab_bar = false
 -- comme le pane). Les bg_color par onglet (ci-dessous) créaient une couche
 -- composée par-dessus qui ne blendait pas pareil → pastille visiblement
 -- opaque même à 0.7. Donc alpha ici, et aucun bg_color sur les onglets.
+-- active_* = la FENÊTRE a le focus, inactive_* = elle ne l'a pas. Les deux bg
+-- portaient la même valeur : à plusieurs fenêtres, rien ne disait laquelle
+-- écoutait le clavier. Deux effets cumulés, tous les deux natifs :
+--   1. le fond recule (0.7 -> 0.28) — la barre non focus se fond dans le bureau ;
+--   2. un filet mauve d'1 px sous la barre n'apparaît QUE sur la fenêtre focus.
+-- Le filet est le signal fort : il est présent/absent, pas plus ou moins pâle,
+-- donc lisible même sur un fond clair où la différence d'alpha se voit mal.
+-- Ces deux-là suffisent à un seul onglet, cas où format-tab-title rend '' et où
+-- la barre n'a aucun texte à teinter (cf. show_tabs_in_tab_bar).
 config.window_frame = {
   -- Base fine, l'onglet actif ressort via Attribute.Intensity='Bold' dans
   -- format-tab-title (synthétisé par-dessus si la famille n'a pas de vrai
   -- style Bold distinct).
   font = wezterm.font { family = 'JetBrainsMono Nerd Font', weight = 'Light' },
   active_titlebar_bg = 'rgba(17, 17, 27, 0.7)',
-  inactive_titlebar_bg = 'rgba(17, 17, 27, 0.7)',
+  inactive_titlebar_bg = 'rgba(17, 17, 27, 0.28)',
+  -- Sans effet sur les libellés d'onglets : format-tab-title fixe sa propre
+  -- couleur par segment et l'emporte. Ces deux-là ne teintent que le reste de
+  -- la barre (titre de fenêtre en retro, zone hors onglets).
+  active_titlebar_fg = '#cdd6f4',
+  inactive_titlebar_fg = '#585b70',
+  active_titlebar_border_bottom = '#cba6f7',
+  -- Alpha 0 plutôt qu'une couleur sombre : le filet DISPARAÎT au lieu de
+  -- devenir une deuxième ligne discrète à interpréter.
+  inactive_titlebar_border_bottom = 'rgba(17, 17, 27, 0)',
 }
 -- bg_color est un champ obligatoire du schéma (WezTerm refuse de l'omettre),
 -- mais alpha 0 = couche invisible : l'onglet repose sur le fond (déjà
--- transparent) du window_frame ci-dessus, sans jamais assombrir en le
--- superposant. Seule l'épaisseur de la police distingue l'onglet actif
--- (Bold) du reste (Normal).
+-- transparent) du window_frame ci-dessus, sans jamais l'assombrir en le
+-- superposant. Aucun onglet ne peint d'aplat, actif compris : un bg_color sur
+-- l'actif donne la « pastille » que la note du window_frame décrit — elle ne
+-- blende pas comme le pane et se détache du bureau. L'actif se distingue par
+-- l'ENCRE, jamais par un aplat (cf. format-tab-title). Deux essais de fond
+-- actif ont été faits et jetés, mauve puis neutre : la fancy tab bar peint un
+-- rectangle pleine hauteur aux angles vifs, et ne sait pas les arrondir. Ce
+-- n'est pas une histoire de couleur ou d'alpha, c'est la forme — inutile de
+-- rejouer la manip avec une autre teinte.
 config.colors = {
   background = '#11111b',
   tab_bar = {
@@ -353,6 +381,22 @@ config.mouse_bindings = {
     mods = 'ALT',
     action = wezterm.action.CompleteSelectionOrOpenLinkAtMouseCursor 'ClipboardAndPrimarySelection',
   },
+  -- Une application qui active le mouse reporting (Claude Code, nvim, htop) reçoit
+  -- le clic AVANT WezTerm : les quatre bindings ci-dessus ne s'appliquent alors plus
+  -- du tout. MESURÉ (wezterm show-keys) : la table « Mouse: mouse_reporting » était
+  -- VIDE, donc aucun geste n'ouvrait un lien dans le TUI — pas même Shift+Option,
+  -- SHIFT|ALT étant rabattu ci-dessus sur CompleteSelection. `mouse_reporting = true`
+  -- crée les tables « Mouse: mouse_reporting » et « mouse_reporting + alt_screen »,
+  -- et rend Option+clic actif dans les deux.
+  -- OpenLinkAtMouseCursor sec, pas la variante CompleteSelectionOr… : sous reporting
+  -- le Down et le Drag partent à l'application, il n'y a donc jamais de sélection à
+  -- compléter au relâchement.
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'ALT',
+    mouse_reporting = true,
+    action = wezterm.action.OpenLinkAtMouseCursor,
+  },
 }
 
 -- obsidian:// links clickable (option+click)
@@ -519,6 +563,20 @@ local function pane_title_parts(pane, path_transform)
   return groups
 end
 
+-- Pendant de show_tabs_in_tab_bar : à un seul onglet il n'y a rien à montrer,
+-- donc on masque les onglets et le ✕ part avec ; dès le deuxième ils
+-- reviennent avec leurs libellés. set_config_overrides recharge la config de
+-- la fenêtre, donc on n'écrit que si la valeur change : sinon c'est un reload
+-- à chaque tick de status_update_interval.
+wezterm.on('update-status', function(window)
+  local show = #window:mux_window():tabs() > 1
+  local overrides = window:get_config_overrides() or {}
+  if overrides.show_tabs_in_tab_bar ~= show then
+    overrides.show_tabs_in_tab_bar = show
+    window:set_config_overrides(overrides)
+  end
+end)
+
 wezterm.on('format-tab-title', function(tab, tabs)
   -- À un seul onglet, le libellé ne distingue rien : il double le contexte
   -- déjà affiché par le prompt. On rend la barre vide pour ne laisser que les
@@ -530,9 +588,23 @@ wezterm.on('format-tab-title', function(tab, tabs)
   -- doivent pas concurrencer path/branche/titre pour l'attention.
   local sep_color = tab.is_active and '#9399b2' or '#585b70'
 
+  -- Deux pistes mesurées et écartées, à ne pas rejouer :
+  --   Attribute.Underline='Single' ne rend RIEN en fancy (vérifié au pixel,
+  --   zoom x3) — le souligné n'existe que sur la barre retro ;
+  --   un bg_color sur l'onglet actif donne une dalle rectangulaire pleine
+  --   hauteur (cf. la note de colors.tab_bar).
+  -- Reste l'encre. L'onglet actif garde les couleurs pleines de
+  -- SEGMENT_COLORS, les autres sont désaturés et assombris vers le fond : rien
+  -- n'est dessiné, un seul onglet est allumé. Bold est conservé mais ne compte
+  -- pas seul, window_frame.font est en weight Light et la graisse est synthétisée.
+  local function ink(color)
+    if tab.is_active then return color end
+    return tostring(wezterm.color.parse(color):desaturate(0.9):darken(0.4))
+  end
+
   local items = { { Attribute = { Intensity = tab.is_active and 'Bold' or 'Normal' } } }
   local function push(color, text)
-    table.insert(items, { Foreground = { Color = color } })
+    table.insert(items, { Foreground = { Color = ink(color) } })
     table.insert(items, { Text = text })
   end
 
