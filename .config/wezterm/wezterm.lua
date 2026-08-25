@@ -139,9 +139,17 @@ config.front_end = 'WebGpu'
 config.enable_kitty_graphics = true
 config.window_padding = { left = '1cell', right = '1cell', top = '0.5cell', bottom = '0.5cell' }
 config.enable_tab_bar = true
+-- La fancy tab bar colle un bouton ✕ sur chaque onglet, que rien ne
+-- configure : même avec un libellé vide (cf. format-tab-title), le ✕ reste à
+-- côté des trois boutons. Seule la retro (false) s'en débarrasse, mais son
+-- rendu en cellules terminal est moins bon. On garde fancy, on garde le ✕.
 config.use_fancy_tab_bar = true
-config.hide_tab_bar_if_only_one_tab = true
-config.tab_bar_at_bottom = true
+-- Les deux false sont imposés par INTEGRATED_BUTTONS (cf. window_decorations
+-- plus bas) : les boutons natifs sont dessinés DANS la barre d'onglets. Si
+-- elle se cache à un seul onglet, les boutons partent avec ; si elle est en
+-- bas, ils descendent avec.
+config.hide_tab_bar_if_only_one_tab = false
+config.tab_bar_at_bottom = false
 -- Le bouton + ferme la boucle du minimalisme : pas de bouton, pas de liseré
 -- à styliser à côté. Cmd+T (déjà bindé) ouvre un onglet.
 config.show_new_tab_button_in_tab_bar = false
@@ -165,9 +173,9 @@ config.window_frame = {
 config.colors = {
   background = '#11111b',
   tab_bar = {
-    -- window_frame ne couvre que la zone titlebar en haut ; en bas
-    -- (tab_bar_at_bottom) la barre retombe sur ce champ. Alpha safe ici vu
-    -- que active_tab/inactive_tab sont eux-mêmes à alpha 0 (pas de cumul).
+    -- window_frame peint la barre en fancy. Ce champ est la reprise si on
+    -- repasse en retro. Alpha safe ici vu que active_tab/inactive_tab sont
+    -- eux-mêmes à alpha 0 (pas de cumul).
     background = 'rgba(17, 17, 27, 0.7)',
     -- fg_color est ici pour satisfaire le schéma (champ obligatoire comme
     -- bg_color) mais sans effet réel : format-tab-title ci-dessous fixe sa
@@ -184,7 +192,13 @@ config.colors = {
 }
 config.window_background_opacity = 0.7
 config.macos_window_background_blur = 0
-config.window_decorations = 'RESIZE'
+-- INTEGRATED_BUTTONS = WezTerm dessine lui-même les trois boutons dans la
+-- barre d'onglets, au lieu d'une barre de titre native. C'est la seule façon
+-- d'avoir un fond transparent derrière eux : la barre native est peinte par
+-- macOS et ignore active_titlebar_bg, INTEGRATED_BUTTONS le respecte.
+config.window_decorations = 'INTEGRATED_BUTTONS | RESIZE'
+config.integrated_title_button_style = 'MacOsNative'
+config.integrated_title_button_alignment = 'Left'
 config.window_close_confirmation = 'NeverPrompt'
 -- true = fullscreen natif macOS : Space dédié, menu bar cachée (reveal au
 -- survol), contenu sous la safe-area donc 38 pt de bande notch noircie.
@@ -505,7 +519,12 @@ local function pane_title_parts(pane, path_transform)
   return groups
 end
 
-wezterm.on('format-tab-title', function(tab)
+wezterm.on('format-tab-title', function(tab, tabs)
+  -- À un seul onglet, le libellé ne distingue rien : il double le contexte
+  -- déjà affiché par le prompt. On rend la barre vide pour ne laisser que les
+  -- trois boutons intégrés. Dès le deuxième onglet, les libellés reviennent.
+  if #tabs == 1 then return '' end
+
   local groups = pane_title_parts(tab.active_pane, shorten_path)
   -- Séparateurs discrets, jamais dans les couleurs des segments : ils ne
   -- doivent pas concurrencer path/branche/titre pour l'attention.
