@@ -10,8 +10,6 @@ IC_5H = ""  # clock        -> rate limit 5h
 IC_7D = ""  # calendar     -> rate limit 7d
 IC_MODEL = ""  # microchip    -> model
 IC_EFFORT = ""  # tachometer   -> effort
-IC_DIR = ""  # folder       -> current path
-IC_GIT = ""  # branch       -> git branch
 
 # --- 256-color ANSI ---
 def c(code, s):
@@ -19,8 +17,41 @@ def c(code, s):
 
 ICON = 75       # frost cyan
 TEXT = 252
-DIM = 240
 SEP = c(238, " │ ")
+
+# toggled by the statusline-toggle script — "icons" (default) or "text"
+STYLE_FILE = os.path.expanduser("~/.claude/statusline-style")
+
+
+def get_style():
+    try:
+        s = open(STYLE_FILE, encoding="utf-8").read().strip()
+    except OSError:
+        return "icons"
+    return s if s in ("icons", "text") else "icons"
+
+# each model maps to a fill level on the same circle_slice scale as the
+# rate-limit circles (haiku=light/fast .. opus=full/top-tier); fable sits off
+# the cost axis (narrative-purpose, not "bigger" than opus) so it gets its
+# own level instead of colliding with sonnet or opus
+MODEL_LEVELS = {
+    "haiku":  25,
+    "sonnet": 50,
+    "fable":  75,
+    "opus":   100,
+}
+
+# effort maps onto the same circle_slice scale, reusing pct_color's own
+# severity ramp for color (114 green / 215 amber / 220 amber-high / 203 red);
+# max keeps the fire glyph instead of a fuller circle — xhigh is already a
+# full circle, so max still needs a shape break to be told apart
+EFFORT_LEVELS = {
+    "low":    (25, 114),
+    "medium": (50, 220),
+    "high":   (75, 215),
+    "xhigh":  (100, 203),
+}
+EFFORT_MAX_GLYPH = ("", 203)  # fire — beyond full, breaks the circle metaphor on purpose
 
 
 def pct_color(p):
@@ -31,18 +62,14 @@ def pct_color(p):
     return 114       # green
 
 
-def fmt_reset(epoch, now):
-    rem = int(epoch) - int(now)
-    if rem <= 0:
-        return None
-    days, rem = divmod(rem, 86400)
-    hours, rem = divmod(rem, 3600)
-    mins = rem // 60
-    if days:
-        return f"-{days}j{hours}h" if hours else f"-{days}j"
-    if hours:
-        return f"-{hours}h{mins:02d}"
-    return f"-{mins}m"
+# md-circle_slice_1 .. md-circle_slice_8 — a circle filled in eighths, index 0 = 1/8
+CIRCLE_SLICES = ["󰪞", "󰪟", "󰪠", "󰪡", "󰪢", "󰪣", "󰪤", "󰪥"]
+CIRCLE_EMPTY = ""  # fa-circle_thin — 0%, no slice reads as "empty" rather than "1/8"
+
+
+def circle_glyph(p):
+    level = round(max(0, min(100, p)) / 100 * 8)
+    return CIRCLE_EMPTY if level == 0 else CIRCLE_SLICES[level - 1]
 
 
 def main():
@@ -53,89 +80,113 @@ def main():
         data = {}
     d = data.get("data", data) if isinstance(data, dict) else {}
 
+    style = get_style()
     parts = []
-    rl = d.get("rate_limits", {}) or {}
+    # Claude Code does not always put rate_limits on stdin. vibe-island keeps a
+    # fresh copy on disk, so read that when the payload has none — else the
+    # quota glyphs vanish with no sign of why.
+    rl = d.get("rate_limits") or {}
+    if not rl:
+        try:
+            with open(os.path.expanduser("~/.vibe-island/cache/rl.json")) as f:
+                rl = json.load(f) or {}
+        except Exception:
+            rl = {}
     now = time.time()
 
-    # current path (home-relative, fish-style)
-    cwd = d.get("cwd") or (d.get("workspace") or {}).get("current_dir") or ""
-    if cwd:
-        home = os.path.expanduser("~")
-        root = "~" if cwd.startswith(home) else ""
-        tail = cwd[len(home):] if cwd.startswith(home) else cwd
-        segs = [s for s in tail.split("/") if s]
-        # fish-style: abbreviate every ancestor to its first char, keep last full
-        disp = "/".join([s[0] for s in segs[:-1]] + segs[-1:]) if segs else ""
-        disp = (root + "/" + disp).rstrip("/") if disp else (root or "/")
-        parts.append(c(ICON, IC_DIR) + " " + c(TEXT, disp))
+    # model + effort
+    if style == "text":
+        name = (d.get("model") or {}).get("display_name", "")
+        effort = (d.get("effort") or {}).get("level", "")
+        compact = []
+        if name:
+            words = name.replace("Claude ", "").strip().split()
+            family = words[0][:3].lower() if words else ""
+            version = words[1] if len(words) > 1 else ""
+            if family:
+                compact.append(f"{family}-{version}" if version else family)
+        if effort and effort != "unset":
+            short = {"medium": "med"}.get(effort, effort)
+            compact.append(short[:3])
+        if compact:
+            parts.append(c(ICON, IC_MODEL) + " " + c(141, "-".join(compact)))
+    else:
+        model_effort = []
+        name = (d.get("model") or {}).get("display_name", "").lower()
+        if name:
+            key = next((k for k in MODEL_LEVELS if k in name), None)
+            level = MODEL_LEVELS.get(key)
+            glyph = circle_glyph(level) if level is not None else CIRCLE_EMPTY
+            model_effort.append(c(ICON, glyph))
 
-    # git branch + dirty state (single call: porcelain v2 has branch, ahead/behind, files)
-    if cwd:
-        try:
-            lines = subprocess.run(
-                ["git", "-C", cwd, "status", "--porcelain=v2", "--branch"],
-                capture_output=True, text=True, timeout=0.3,
-            ).stdout.splitlines()
-        except Exception:
-            lines = []
-        branch, ahead, modified, untracked = "", 0, 0, 0
-        for line in lines:
-            if line.startswith("# branch.head "):
-                branch = line.split(" ", 2)[2]
-            elif line.startswith("# branch.ab "):
-                ahead = int(line.split()[2].lstrip("+"))
-            elif line.startswith(("1 ", "2 ")):
-                modified += 1
-            elif line.startswith("? "):
-                untracked += 1
-        if branch and branch != "(detached)":
-            git_str = c(ICON, IC_GIT) + " " + c(213, branch)
-            if modified:
-                git_str += " " + c(215, f"*{modified}")
-            if untracked:
-                git_str += " " + c(DIM, f"?{untracked}")
-            if ahead:
-                git_str += " " + c(114, f"↑{ahead}")
-            parts.append(git_str)
+        effort = (d.get("effort") or {}).get("level", "")
+        if effort and effort != "unset":
+            if effort == "max":
+                glyph, color = EFFORT_MAX_GLYPH
+            else:
+                level = EFFORT_LEVELS.get(effort)
+                if level:
+                    pct, color = level
+                    glyph = circle_glyph(pct)
+                else:
+                    glyph, color = (IC_EFFORT, ICON)
+            model_effort.append(c(color, glyph))
 
-    # model
-    name = (d.get("model") or {}).get("display_name", "")
-    if name:
-        name = name.replace("Claude ", "").strip()
-        parts.append(c(ICON, IC_MODEL) + " " + c(141, name))
-
-    # effort (from stdin: effort.level)
-    effort = (d.get("effort") or {}).get("level", "")
-    if effort and effort != "unset":
-        short = {"medium": "med"}.get(effort, effort)
-        parts.append(c(ICON, IC_EFFORT) + " " + c(180, short))
+        if model_effort:
+            parts.append(" ".join(model_effort))
 
     # fast mode flag
     if d.get("fast_mode") is True:
-        parts.append(c(ICON, "") + " " + c(214, "fast"))
+        parts.append(c(ICON, "\uf0e7") + " " + c(214, "fast"))
 
     # rate limit 5h (rolling)
     five = rl.get("five_hour") or {}
     fp = five.get("used_percentage")
     if fp is not None:
-        seg = c(ICON, IC_5H) + " " + c(pct_color(fp), f"{int(fp)}%")
-        rs = fmt_reset(five["resets_at"], now) if five.get("resets_at") else None
-        if rs:
-            seg += " " + c(DIM, rs)
+        seg = c(ICON, IC_5H) + " "
+        if style == "text":
+            seg += c(pct_color(fp), f"{int(fp)}%")
+            if five.get("resets_at"):
+                elapsed_frac = 100 - max(0, min(1, (five["resets_at"] - now) / (5 * 3600))) * 100
+                seg += " " + c(ICON, circle_glyph(elapsed_frac))
+        else:
+            seg += c(pct_color(fp), circle_glyph(fp))
+            if five.get("resets_at"):
+                elapsed_frac = 100 - max(0, min(1, (five["resets_at"] - now) / (5 * 3600))) * 100
+                seg += " " + c(ICON, circle_glyph(elapsed_frac))
         parts.append(seg)
 
     # rate limit 7d (weekly) — last
     seven = rl.get("seven_day") or {}
     sp = seven.get("used_percentage")
     if sp is not None:
-        seg = c(ICON, IC_7D) + " " + c(pct_color(sp), f"{int(sp)}%")
-        rs = fmt_reset(seven["resets_at"], now) if seven.get("resets_at") else None
-        if rs:
-            seg += " " + c(DIM, rs)
+        seg = c(ICON, IC_7D) + " "
+        if style == "text":
+            seg += c(pct_color(sp), f"{int(sp)}%")
+            if seven.get("resets_at"):
+                elapsed_frac = 100 - max(0, min(1, (seven["resets_at"] - now) / (7 * 86400))) * 100
+                seg += " " + c(ICON, circle_glyph(elapsed_frac))
+        else:
+            seg += c(pct_color(sp), circle_glyph(sp))
+            if seven.get("resets_at"):
+                elapsed_frac = 100 - max(0, min(1, (seven["resets_at"] - now) / (7 * 86400))) * 100
+                seg += " " + c(ICON, circle_glyph(elapsed_frac))
         parts.append(seg)
 
-    sys.stdout.write(SEP.join(parts))
+    # project-local segment — appended after the global one, never replaces it
+    project_dir = (d.get("workspace") or {}).get("project_dir") or os.environ.get("CLAUDE_PROJECT_DIR")
+    if project_dir:
+        hook = os.path.join(project_dir, ".claude", "hooks", "statusline.sh")
+        if os.access(hook, os.X_OK):
+            try:
+                res = subprocess.run(["sh", hook], input=raw, capture_output=True, text=True, timeout=3)
+                seg = res.stdout.strip()
+                if seg:
+                    parts.append(seg)
+            except Exception:
+                pass
 
+    sys.stdout.write(SEP.join(parts))
 
 if __name__ == "__main__":
     main()
