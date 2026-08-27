@@ -397,6 +397,26 @@ config.mouse_bindings = {
     mouse_reporting = true,
     action = wezterm.action.OpenLinkAtMouseCursor,
   },
+  -- Down et Drag doivent être avalés AUSSI, sinon le clic reste « enfoncé » dans le TUI.
+  -- MESURÉ (wezterm show-keys) : les tables « mouse_reporting » ne portaient QUE le Up.
+  -- Sous reporting, chaque événement est cherché indépendamment : le Down partait donc à
+  -- l'application, le Up était consommé par le binding ci-dessus, et Claude Code ne voyait
+  -- jamais le relâchement. Bouton bloqué en position basse → la sélection s'étendait
+  -- toute seule au moindre mouvement de souris après un option+clic.
+  -- Nop et pas DisableDefaultAssignment : ce dernier RENDRAIT l'événement au défaut
+  -- (= transmis à l'application), soit exactement ce qu'on veut empêcher.
+  {
+    event = { Down = { streak = 1, button = 'Left' } },
+    mods = 'ALT',
+    mouse_reporting = true,
+    action = wezterm.action.Nop,
+  },
+  {
+    event = { Drag = { streak = 1, button = 'Left' } },
+    mods = 'ALT',
+    mouse_reporting = true,
+    action = wezterm.action.Nop,
+  },
 }
 
 -- obsidian:// links clickable (option+click)
