@@ -186,7 +186,20 @@ def main():
             except Exception:
                 pass
 
-    sys.stdout.write(SEP.join(parts))
+    out = SEP.join(parts)
+
+    # second line — board and workers, read from the ~/Projects/workflows cache (refreshed in background)
+    wf = os.path.expanduser("~/Projects/workflows/bin/workflows-status")
+    if os.access(wf, os.X_OK):
+        try:
+            res = subprocess.run([wf, "--line"], capture_output=True, text=True, timeout=2)
+            seg = res.stdout.strip()
+            if seg:
+                out += "\n" + seg
+        except Exception:
+            pass
+
+    sys.stdout.write(out)
 
 if __name__ == "__main__":
     main()
